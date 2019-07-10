@@ -2,10 +2,11 @@
 Locking-related classes
 """
 
-import plexpy.logger
-import time
-import threading
 import Queue
+import threading
+import time
+
+import plexpy.logger
 
 
 class TimedLock(object):

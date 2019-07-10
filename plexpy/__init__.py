@@ -137,8 +137,8 @@ def initialize(config_file):
             return False
 
         if CONFIG.HTTP_PORT < 21 or CONFIG.HTTP_PORT > 65535:
-            plexpy.logger.warn(
-                u"HTTP_PORT out of bounds: 21 < %s < 65535", CONFIG.HTTP_PORT)
+            plexpy.logger.warn(u"HTTP_PORT out of bounds: 21 < %s < 65535",
+                               CONFIG.HTTP_PORT)
             CONFIG.HTTP_PORT = 8181
 
         if not CONFIG.HTTPS_CERT:
@@ -149,41 +149,35 @@ def initialize(config_file):
         CONFIG.LOG_DIR, log_writable = check_folder_writable(
             CONFIG.LOG_DIR, os.path.join(DATA_DIR, 'logs'), 'logs')
         if not log_writable and not QUIET:
-            sys.stderr.write("Unable to create the log directory. Logging to screen only.\n")
+            sys.stderr.write(
+                "Unable to create the log directory. Logging to screen only.\n"
+            )
 
         # Start the logger, disable console if needed
-        logger.initLogger(console=not QUIET, log_dir=CONFIG.LOG_DIR if log_writable else None,
+        logger.initLogger(console=not QUIET,
+                          log_dir=CONFIG.LOG_DIR if log_writable else None,
                           verbose=VERBOSE)
 
-        logger.info(u"Starting Tautulli {}".format(
-            common.RELEASE
-        ))
+        logger.info(u"Starting Tautulli {}".format(common.RELEASE))
         logger.info(u"{}{} {} ({}{})".format(
-            '[Docker] ' if DOCKER else '', common.PLATFORM, common.PLATFORM_RELEASE, common.PLATFORM_VERSION,
-            ' - {}'.format(common.PLATFORM_LINUX_DISTRO) if common.PLATFORM_LINUX_DISTRO else ''
-        ))
-        logger.info(u"{} (UTC{})".format(
-            plexpy.SYS_TIMEZONE.zone, plexpy.SYS_UTC_OFFSET
-        ))
-        logger.info(u"Python {}".format(
-            sys.version
-        ))
-        logger.info(u"Program Dir: {}".format(
-            PROG_DIR
-        ))
-        logger.info(u"Config File: {}".format(
-            CONFIG_FILE
-        ))
-        logger.info(u"Database File: {}".format(
-            DB_FILE
-        ))
+            '[Docker] ' if DOCKER else '', common.PLATFORM,
+            common.PLATFORM_RELEASE, common.PLATFORM_VERSION,
+            ' - {}'.format(common.PLATFORM_LINUX_DISTRO)
+            if common.PLATFORM_LINUX_DISTRO else ''))
+        logger.info(u"{} (UTC{})".format(plexpy.SYS_TIMEZONE.zone,
+                                         plexpy.SYS_UTC_OFFSET))
+        logger.info(u"Python {}".format(sys.version))
+        logger.info(u"Program Dir: {}".format(PROG_DIR))
+        logger.info(u"Config File: {}".format(CONFIG_FILE))
+        logger.info(u"Database File: {}".format(DB_FILE))
 
         CONFIG.BACKUP_DIR, _ = check_folder_writable(
             CONFIG.BACKUP_DIR, os.path.join(DATA_DIR, 'backups'), 'backups')
         CONFIG.CACHE_DIR, _ = check_folder_writable(
             CONFIG.CACHE_DIR, os.path.join(DATA_DIR, 'cache'), 'cache')
         CONFIG.NEWSLETTER_DIR, _ = check_folder_writable(
-            CONFIG.NEWSLETTER_DIR, os.path.join(DATA_DIR, 'newsletters'), 'newsletters')
+            CONFIG.NEWSLETTER_DIR, os.path.join(DATA_DIR, 'newsletters'),
+            'newsletters')
 
         # Initialize the database
         logger.info(u"Checking if the database upgrades are required...")
@@ -230,14 +224,16 @@ def initialize(config_file):
                 with open(version_lock_file, "r") as fp:
                     prev_version = fp.read()
             except IOError as e:
-                logger.error(u"Unable to read previous version from file '%s': %s" %
-                             (version_lock_file, e))
+                logger.error(
+                    u"Unable to read previous version from file '%s': %s" %
+                    (version_lock_file, e))
         else:
             prev_version = 'cfd30996264b7e9fe4ef87f02d1cc52d1ae8bfca'
 
         # Get the currently installed version. Returns None, 'win32' or the git
         # hash.
-        CURRENT_VERSION, CONFIG.GIT_REMOTE, CONFIG.GIT_BRANCH = versioncheck.getVersion()
+        CURRENT_VERSION, CONFIG.GIT_REMOTE, CONFIG.GIT_BRANCH = versioncheck.getVersion(
+        )
 
         # Write current version to a file, so we know which version did work.
         # This allowes one to restore to that version. The idea is that if we
@@ -247,8 +243,9 @@ def initialize(config_file):
                 with open(version_lock_file, "w") as fp:
                     fp.write(CURRENT_VERSION)
             except IOError as e:
-                logger.error(u"Unable to write current version to file '%s': %s" %
-                             (version_lock_file, e))
+                logger.error(
+                    u"Unable to write current version to file '%s': %s" %
+                    (version_lock_file, e))
 
         # Check for new versions
         if CONFIG.CHECK_GITHUB_ON_STARTUP and CONFIG.CHECK_GITHUB:
@@ -268,8 +265,9 @@ def initialize(config_file):
                 with open(release_file, "r") as fp:
                     PREV_RELEASE = fp.read()
             except IOError as e:
-                logger.error(u"Unable to read previous release from file '%s': %s" %
-                             (release_file, e))
+                logger.error(
+                    u"Unable to read previous release from file '%s': %s" %
+                    (release_file, e))
         elif prev_version == 'cfd30996264b7e9fe4ef87f02d1cc52d1ae8bfca':  # Commit hash for v1.4.25
             PREV_RELEASE = 'v1.4.25'
 
@@ -311,8 +309,7 @@ def daemonize():
     if threading.activeCount() != 1:
         logger.warn(
             u"There are %r active threads. Daemonizing may cause"
-            " strange behavior.",
-            threading.enumerate())
+            " strange behavior.", threading.enumerate())
 
     sys.stdout.flush()
     sys.stderr.flush()
@@ -379,7 +376,8 @@ def win_system_tray():
     from systray import SysTrayIcon
 
     def tray_open(sysTrayIcon):
-        launch_browser(plexpy.CONFIG.HTTP_HOST, plexpy.HTTP_PORT, plexpy.HTTP_ROOT)
+        launch_browser(plexpy.CONFIG.HTTP_HOST, plexpy.HTTP_PORT,
+                       plexpy.HTTP_ROOT)
 
     def tray_check_update(sysTrayIcon):
         versioncheck.check_update()
@@ -398,22 +396,28 @@ def win_system_tray():
         plexpy.SIGNAL = 'shutdown'
 
     if plexpy.UPDATE_AVAILABLE:
-        icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/', plexpy.CONFIG.INTERFACE, 'images/logo_tray-update.ico')
+        icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/',
+                            plexpy.CONFIG.INTERFACE,
+                            'images/logo_tray-update.ico')
         hover_text = common.PRODUCT + ' - Update Available!'
     else:
-        icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/', plexpy.CONFIG.INTERFACE, 'images/logo_tray.ico')
+        icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/',
+                            plexpy.CONFIG.INTERFACE, 'images/logo_tray.ico')
         hover_text = common.PRODUCT
 
-    menu_options = (('Open Tautulli', None, tray_open, 'default'),
-                    ('', None, 'separator', None),
-                    ('Check for Updates', None, tray_check_update, None),
-                    ('Update', None, tray_update, None),
-                    ('Restart', None, tray_restart, None))
+    menu_options = (('Open Tautulli', None, tray_open,
+                     'default'), ('', None, 'separator', None),
+                    ('Check for Updates', None, tray_check_update,
+                     None), ('Update', None, tray_update,
+                             None), ('Restart', None, tray_restart, None))
 
     logger.info(u"Launching system tray icon.")
 
     try:
-        plexpy.WIN_SYS_TRAY_ICON = SysTrayIcon(icon, hover_text, menu_options, on_quit=tray_quit)
+        plexpy.WIN_SYS_TRAY_ICON = SysTrayIcon(icon,
+                                               hover_text,
+                                               menu_options,
+                                               on_quit=tray_quit)
         plexpy.WIN_SYS_TRAY_ICON.start()
     except Exception as e:
         logger.error(u"Unable to launch system tray icon: %s." % e)
@@ -434,59 +438,115 @@ def initialize_scheduler():
         github_minutes = CONFIG.CHECK_GITHUB_INTERVAL if CONFIG.CHECK_GITHUB_INTERVAL and CONFIG.CHECK_GITHUB else 0
         pms_update_check_hours = CONFIG.PMS_UPDATE_CHECK_INTERVAL if 1 <= CONFIG.PMS_UPDATE_CHECK_INTERVAL else 24
 
-        schedule_job(versioncheck.check_update, 'Check GitHub for updates',
-                     hours=0, minutes=github_minutes, seconds=0, args=(bool(CONFIG.PLEXPY_AUTO_UPDATE), True))
+        schedule_job(versioncheck.check_update,
+                     'Check GitHub for updates',
+                     hours=0,
+                     minutes=github_minutes,
+                     seconds=0,
+                     args=(bool(CONFIG.PLEXPY_AUTO_UPDATE), True))
 
         backup_hours = CONFIG.BACKUP_INTERVAL if 1 <= CONFIG.BACKUP_INTERVAL <= 24 else 6
 
-        schedule_job(database.make_backup, 'Backup Tautulli database',
-                     hours=backup_hours, minutes=0, seconds=0, args=(True, True))
-        schedule_job(config.make_backup, 'Backup Tautulli config',
-                     hours=backup_hours, minutes=0, seconds=0, args=(True, True))
+        schedule_job(database.make_backup,
+                     'Backup Tautulli database',
+                     hours=backup_hours,
+                     minutes=0,
+                     seconds=0,
+                     args=(True, True))
+        schedule_job(config.make_backup,
+                     'Backup Tautulli config',
+                     hours=backup_hours,
+                     minutes=0,
+                     seconds=0,
+                     args=(True, True))
 
         if WS_CONNECTED and CONFIG.PMS_IP and CONFIG.PMS_TOKEN:
-            schedule_job(plextv.get_server_resources, 'Refresh Plex server URLs',
-                         hours=12 * (not bool(CONFIG.PMS_URL_MANUAL)), minutes=0, seconds=0)
+            schedule_job(plextv.get_server_resources,
+                         'Refresh Plex server URLs',
+                         hours=12 * (not bool(CONFIG.PMS_URL_MANUAL)),
+                         minutes=0,
+                         seconds=0)
 
-            schedule_job(activity_pinger.check_server_access, 'Check for Plex remote access',
-                         hours=0, minutes=0, seconds=60 * bool(CONFIG.MONITOR_REMOTE_ACCESS))
-            schedule_job(activity_pinger.check_server_updates, 'Check for Plex updates',
-                         hours=pms_update_check_hours * bool(CONFIG.MONITOR_PMS_UPDATES), minutes=0, seconds=0)
+            schedule_job(activity_pinger.check_server_access,
+                         'Check for Plex remote access',
+                         hours=0,
+                         minutes=0,
+                         seconds=60 * bool(CONFIG.MONITOR_REMOTE_ACCESS))
+            schedule_job(activity_pinger.check_server_updates,
+                         'Check for Plex updates',
+                         hours=pms_update_check_hours *
+                         bool(CONFIG.MONITOR_PMS_UPDATES),
+                         minutes=0,
+                         seconds=0)
 
             # Refresh the users list and libraries list
             user_hours = CONFIG.REFRESH_USERS_INTERVAL if 1 <= CONFIG.REFRESH_USERS_INTERVAL <= 24 else 12
             library_hours = CONFIG.REFRESH_LIBRARIES_INTERVAL if 1 <= CONFIG.REFRESH_LIBRARIES_INTERVAL <= 24 else 12
 
-            schedule_job(users.refresh_users, 'Refresh users list',
-                         hours=user_hours, minutes=0, seconds=0)
-            schedule_job(libraries.refresh_libraries, 'Refresh libraries list',
-                         hours=library_hours, minutes=0, seconds=0)
+            schedule_job(users.refresh_users,
+                         'Refresh users list',
+                         hours=user_hours,
+                         minutes=0,
+                         seconds=0)
+            schedule_job(libraries.refresh_libraries,
+                         'Refresh libraries list',
+                         hours=library_hours,
+                         minutes=0,
+                         seconds=0)
 
-            schedule_job(activity_pinger.connect_server, 'Check for server response',
-                         hours=0, minutes=0, seconds=0)
-            schedule_job(web_socket.send_ping, 'Websocket ping',
-                         hours=0, minutes=0, seconds=10 * bool(CONFIG.WEBSOCKET_MONITOR_PING_PONG))
+            schedule_job(activity_pinger.connect_server,
+                         'Check for server response',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
+            schedule_job(web_socket.send_ping,
+                         'Websocket ping',
+                         hours=0,
+                         minutes=0,
+                         seconds=10 * bool(CONFIG.WEBSOCKET_MONITOR_PING_PONG))
 
         else:
             # Cancel all jobs
-            schedule_job(plextv.get_server_resources, 'Refresh Plex server URLs',
-                         hours=0, minutes=0, seconds=0)
+            schedule_job(plextv.get_server_resources,
+                         'Refresh Plex server URLs',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
 
-            schedule_job(activity_pinger.check_server_access, 'Check for Plex remote access',
-                         hours=0, minutes=0, seconds=0)
-            schedule_job(activity_pinger.check_server_updates, 'Check for Plex updates',
-                         hours=0, minutes=0, seconds=0)
+            schedule_job(activity_pinger.check_server_access,
+                         'Check for Plex remote access',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
+            schedule_job(activity_pinger.check_server_updates,
+                         'Check for Plex updates',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
 
-            schedule_job(users.refresh_users, 'Refresh users list',
-                         hours=0, minutes=0, seconds=0)
-            schedule_job(libraries.refresh_libraries, 'Refresh libraries list',
-                         hours=0, minutes=0, seconds=0)
+            schedule_job(users.refresh_users,
+                         'Refresh users list',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
+            schedule_job(libraries.refresh_libraries,
+                         'Refresh libraries list',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
 
             # Schedule job to reconnect server
-            schedule_job(activity_pinger.connect_server, 'Check for server response',
-                         hours=0, minutes=0, seconds=60, args=(False,))
-            schedule_job(web_socket.send_ping, 'Websocket ping',
-                         hours=0, minutes=0, seconds=0)
+            schedule_job(activity_pinger.connect_server,
+                         'Check for server response',
+                         hours=0,
+                         minutes=0,
+                         seconds=60,
+                         args=(False, ))
+            schedule_job(web_socket.send_ping,
+                         'Websocket ping',
+                         hours=0,
+                         minutes=0,
+                         seconds=0)
 
         # Start scheduler
         if start_jobs and len(SCHED.get_jobs()):
@@ -509,13 +569,23 @@ def schedule_job(func, name, hours=0, minutes=0, seconds=0, args=None):
         if hours == 0 and minutes == 0 and seconds == 0:
             SCHED.remove_job(name)
             logger.info(u"Removed background task: %s", name)
-        elif job.trigger.interval != datetime.timedelta(hours=hours, minutes=minutes):
-            SCHED.reschedule_job(name, trigger=IntervalTrigger(
-                hours=hours, minutes=minutes, seconds=seconds, timezone=pytz.UTC), args=args)
+        elif job.trigger.interval != datetime.timedelta(hours=hours,
+                                                        minutes=minutes):
+            SCHED.reschedule_job(name,
+                                 trigger=IntervalTrigger(hours=hours,
+                                                         minutes=minutes,
+                                                         seconds=seconds,
+                                                         timezone=pytz.UTC),
+                                 args=args)
             logger.info(u"Re-scheduled background task: %s", name)
     elif hours > 0 or minutes > 0 or seconds > 0:
-        SCHED.add_job(func, id=name, trigger=IntervalTrigger(
-            hours=hours, minutes=minutes, seconds=seconds, timezone=pytz.UTC), args=args)
+        SCHED.add_job(func,
+                      id=name,
+                      trigger=IntervalTrigger(hours=hours,
+                                              minutes=minutes,
+                                              seconds=seconds,
+                                              timezone=pytz.UTC),
+                      args=args)
         logger.info(u"Scheduled background task: %s", name)
 
 
@@ -525,14 +595,17 @@ def start():
     if _INITIALIZED:
         global SCHED
         SCHED = BackgroundScheduler(timezone=pytz.UTC)
-        activity_handler.ACTIVITY_SCHED = BackgroundScheduler(timezone=pytz.UTC)
-        newsletter_handler.NEWSLETTER_SCHED = BackgroundScheduler(timezone=pytz.UTC)
+        activity_handler.ACTIVITY_SCHED = BackgroundScheduler(
+            timezone=pytz.UTC)
+        newsletter_handler.NEWSLETTER_SCHED = BackgroundScheduler(
+            timezone=pytz.UTC)
 
         # Start the scheduler for stale stream callbacks
         activity_handler.ACTIVITY_SCHED.start()
 
         # Start background notification thread
-        notification_handler.start_threads(num_threads=CONFIG.NOTIFICATION_THREADS)
+        notification_handler.start_threads(
+            num_threads=CONFIG.NOTIFICATION_THREADS)
         notifiers.check_browser_enabled()
 
         if CONFIG.FIRST_RUN_COMPLETE:
@@ -597,8 +670,7 @@ def dbcheck():
         'synced_version INTEGER, synced_version_profile TEXT, '
         'live INTEGER, live_uuid TEXT, secure INTEGER, relayed INTEGER, '
         'buffer_count INTEGER DEFAULT 0, buffer_last_triggered INTEGER, last_paused INTEGER, watched INTEGER DEFAULT 0, '
-        'write_attempts INTEGER DEFAULT 0, raw_stream_info TEXT)'
-    )
+        'write_attempts INTEGER DEFAULT 0, raw_stream_info TEXT)')
 
     # session_history table :: This is a history table which logs essential stream details
     c_db.execute(
@@ -643,8 +715,7 @@ def dbcheck():
         'art TEXT, media_type TEXT, year INTEGER, originally_available_at TEXT, added_at INTEGER, updated_at INTEGER, '
         'last_viewed_at INTEGER, content_rating TEXT, summary TEXT, tagline TEXT, rating TEXT, '
         'duration INTEGER DEFAULT 0, guid TEXT, directors TEXT, writers TEXT, actors TEXT, genres TEXT, studio TEXT, '
-        'labels TEXT)'
-    )
+        'labels TEXT)')
 
     # users table :: This table keeps record of the friends list
     c_db.execute(
@@ -654,8 +725,7 @@ def dbcheck():
         'is_allow_sync INTEGER DEFAULT NULL, is_restricted INTEGER DEFAULT NULL, do_notify INTEGER DEFAULT 1, '
         'keep_history INTEGER DEFAULT 1, deleted_user INTEGER DEFAULT 0, allow_guest INTEGER DEFAULT 0, '
         'user_token TEXT, server_token TEXT, shared_libraries TEXT, filter_all TEXT, filter_movies TEXT, filter_tv TEXT, '
-        'filter_music TEXT, filter_photos TEXT)'
-    )
+        'filter_music TEXT, filter_photos TEXT)')
 
     # library_sections table :: This table keeps record of the servers library sections
     c_db.execute(
@@ -663,8 +733,7 @@ def dbcheck():
         'server_id TEXT, section_id INTEGER, section_name TEXT, section_type TEXT, agent TEXT, '
         'thumb TEXT, custom_thumb_url TEXT, art TEXT, count INTEGER, parent_count INTEGER, child_count INTEGER, '
         'do_notify INTEGER DEFAULT 1, do_notify_created INTEGER DEFAULT 1, keep_history INTEGER DEFAULT 1, '
-        'deleted_section INTEGER DEFAULT 0, UNIQUE(server_id, section_id))'
-    )
+        'deleted_section INTEGER DEFAULT 0, UNIQUE(server_id, section_id))')
 
     # user_login table :: This table keeps record of the Tautulli guest logins
     c_db.execute(
@@ -692,8 +761,7 @@ def dbcheck():
         'on_created_body TEXT, on_extdown_body TEXT, on_intdown_body TEXT, '
         'on_extup_body TEXT, on_intup_body TEXT, on_pmsupdate_body TEXT, '
         'on_concurrent_body TEXT, on_newdevice_body TEXT, on_plexpyupdate_body TEXT, '
-        'custom_conditions TEXT, custom_conditions_logic TEXT)'
-    )
+        'custom_conditions TEXT, custom_conditions_logic TEXT)')
 
     # notify_log table :: This is a table which logs notifications sent
     c_db.execute(
@@ -709,8 +777,7 @@ def dbcheck():
         'agent_id INTEGER, agent_name TEXT, agent_label TEXT, id_name TEXT NOT NULL DEFAULT "", '
         'friendly_name TEXT, newsletter_config TEXT, email_config TEXT, '
         'subject TEXT, body TEXT, message TEXT, '
-        'cron TEXT NOT NULL DEFAULT "0 0 * * 0", active INTEGER DEFAULT 0)'
-    )
+        'cron TEXT NOT NULL DEFAULT "0 0 * * 0", active INTEGER DEFAULT 0)')
 
     # newsletter_log table :: This is a table which logs newsletters sent
     c_db.execute(
@@ -718,182 +785,111 @@ def dbcheck():
         'newsletter_id INTEGER, agent_id INTEGER, agent_name TEXT, notify_action TEXT, '
         'subject_text TEXT, body_text TEXT, message_text TEXT, start_date TEXT, end_date TEXT, '
         'start_time INTEGER, end_time INTEGER, uuid TEXT UNIQUE, filename TEXT, email_msg_id TEXT, '
-        'success INTEGER DEFAULT 0)'
-    )
+        'success INTEGER DEFAULT 0)')
 
     # recently_added table :: This table keeps record of recently added items
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS recently_added (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'added_at INTEGER, pms_identifier TEXT, section_id INTEGER, '
         'rating_key INTEGER, parent_rating_key INTEGER, grandparent_rating_key INTEGER, media_type TEXT, '
-        'media_info TEXT)'
-    )
+        'media_info TEXT)')
 
     # mobile_devices table :: This table keeps record of devices linked with the mobile app
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS mobile_devices (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'device_id TEXT NOT NULL UNIQUE, device_token TEXT, device_name TEXT, friendly_name TEXT, '
-        'last_seen INTEGER)'
-    )
+        'last_seen INTEGER)')
 
     # tvmaze_lookup table :: This table keeps record of the TVmaze lookups
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS tvmaze_lookup (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'rating_key INTEGER, thetvdb_id INTEGER, imdb_id TEXT, '
-        'tvmaze_id INTEGER, tvmaze_url TEXT, tvmaze_json TEXT)'
-    )
+        'tvmaze_id INTEGER, tvmaze_url TEXT, tvmaze_json TEXT)')
 
     # themoviedb_lookup table :: This table keeps record of the TheMovieDB lookups
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS themoviedb_lookup (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'rating_key INTEGER, thetvdb_id INTEGER, imdb_id TEXT, '
-        'themoviedb_id INTEGER, themoviedb_url TEXT, themoviedb_json TEXT)'
-    )
+        'themoviedb_id INTEGER, themoviedb_url TEXT, themoviedb_json TEXT)')
 
     # image_hash_lookup table :: This table keeps record of the image hash lookups
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS image_hash_lookup (id INTEGER PRIMARY KEY AUTOINCREMENT, '
         'img_hash TEXT, img TEXT, rating_key INTEGER, width INTEGER, height INTEGER, '
-        'opacity INTEGER, background TEXT, blur INTEGER, fallback TEXT)'
-    )
+        'opacity INTEGER, background TEXT, blur INTEGER, fallback TEXT)')
 
     # imgur_lookup table :: This table keeps record of the Imgur uploads
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS imgur_lookup (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-        'img_hash TEXT, imgur_title TEXT, imgur_url TEXT, delete_hash TEXT)'
-    )
+        'img_hash TEXT, imgur_title TEXT, imgur_url TEXT, delete_hash TEXT)')
 
     # cloudinary_lookup table :: This table keeps record of the Cloudinary uploads
     c_db.execute(
         'CREATE TABLE IF NOT EXISTS cloudinary_lookup (id INTEGER PRIMARY KEY AUTOINCREMENT, '
-        'img_hash TEXT, cloudinary_title TEXT, cloudinary_url TEXT)'
-    )
+        'img_hash TEXT, cloudinary_title TEXT, cloudinary_url TEXT)')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT started FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
+        c_db.execute('ALTER TABLE sessions ADD COLUMN started INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN started INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN paused_counter INTEGER DEFAULT 0'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN state TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN user TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN machine_id TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN paused_counter INTEGER DEFAULT 0')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN state TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN user TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN machine_id TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT title FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN title TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN parent_title TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN grandparent_title TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN friendly_name TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN player TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN user_id INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN title TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN parent_title TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN grandparent_title TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN friendly_name TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN player TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN user_id INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT ip_address FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
+        c_db.execute('ALTER TABLE sessions ADD COLUMN ip_address TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN platform TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN ip_address TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN parent_rating_key INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN platform TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN grandparent_rating_key INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN parent_rating_key INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN view_offset INTEGER DEFAULT 0')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN duration INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN audio_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN width INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN height INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN container TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_codec TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN audio_codec TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN bitrate INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_resolution TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_framerate TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN aspect_ratio TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN audio_channels INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN transcode_protocol TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN grandparent_rating_key INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_container TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN view_offset INTEGER DEFAULT 0'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_video_codec TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN duration INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_audio_codec TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_decision TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_audio_channels INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN transcode_width INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN audio_decision TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN width INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN height INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN container TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN audio_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN bitrate INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_resolution TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_framerate TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN aspect_ratio TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN audio_channels INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_protocol TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_container TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_video_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_audio_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_audio_channels INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_width INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_height INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_height INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -901,47 +897,37 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN buffer_count INTEGER DEFAULT 0'
-        )
+            'ALTER TABLE sessions ADD COLUMN buffer_count INTEGER DEFAULT 0')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN buffer_last_triggered INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN buffer_last_triggered INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT last_paused FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN last_paused INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN last_paused INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT section_id FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN section_id INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN section_id INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT stopped FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stopped INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN stopped INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT transcode_key FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_key TEXT'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN transcode_key TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -949,146 +935,84 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN write_attempts INTEGER DEFAULT 0'
-        )
+            'ALTER TABLE sessions ADD COLUMN write_attempts INTEGER DEFAULT 0')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT transcode_decision FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
+        c_db.execute('ALTER TABLE sessions ADD COLUMN transcode_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN full_title TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN media_index INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_decision TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN full_title TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN media_index INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN parent_media_index INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN thumb TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN parent_thumb TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN grandparent_thumb TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN year INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN parent_media_index INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN thumb TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN parent_thumb TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN grandparent_thumb TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN year INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT raw_stream_info FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
+        c_db.execute('ALTER TABLE sessions ADD COLUMN product TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN product TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN optimized_version INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN optimized_version INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN optimized_version_profile TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN synced_version INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_bitrate INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_width INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_height INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN audio_bitrate INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN subtitle_codec TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN stream_bitrate INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN optimized_version_profile TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_resolution TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN quality_profile TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN synced_version INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_container_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN stream_container TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_bitrate INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN stream_video_codec TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_width INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_bitrate INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_height INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_width INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN audio_bitrate INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_height INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN subtitle_codec TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_video_framerate TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_bitrate INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_audio_decision TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN stream_audio_codec TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_resolution TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_audio_bitrate INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN quality_profile TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_audio_channels INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN subtitles INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_container_decision TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_subtitle_decision TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_container TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_decision TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_bitrate INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_width INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_height INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_video_framerate TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_audio_decision TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_audio_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_audio_bitrate INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_audio_channels INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN subtitles INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_subtitle_decision TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN stream_subtitle_codec TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN raw_stream_info TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN stream_subtitle_codec TEXT')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN raw_stream_info TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT video_height FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN video_height INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN video_height INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT subtitles FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN subtitles INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN subtitles INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -1096,11 +1020,9 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN synced_version_profile TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN synced_version_profile TEXT')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN optimized_version_title TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN optimized_version_title TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -1108,11 +1030,9 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_hw_decoding INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_hw_decoding INTEGER')
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN transcode_hw_encoding INTEGER'
-        )
+            'ALTER TABLE sessions ADD COLUMN transcode_hw_encoding INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -1120,50 +1040,37 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN watched INTEGER DEFAULT 0'
-        )
+            'ALTER TABLE sessions ADD COLUMN watched INTEGER DEFAULT 0')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT live FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN live INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN live_uuid TEXT'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN live INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN live_uuid TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT session_id FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN session_id TEXT'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN session_id TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT original_title FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN original_title TEXT'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN original_title TEXT')
 
     # Upgrade sessions table from earlier versions
     try:
         c_db.execute('SELECT secure FROM sessions')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN secure INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN relayed INTEGER'
-        )
+        c_db.execute('ALTER TABLE sessions ADD COLUMN secure INTEGER')
+        c_db.execute('ALTER TABLE sessions ADD COLUMN relayed INTEGER')
 
     # Upgrade sessions table from earlier versions
     try:
@@ -1171,14 +1078,14 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table sessions.")
         c_db.execute(
-            'ALTER TABLE sessions ADD COLUMN rating_key_websocket TEXT'
-        )
+            'ALTER TABLE sessions ADD COLUMN rating_key_websocket TEXT')
 
     # Upgrade session_history table from earlier versions
     try:
         c_db.execute('SELECT reference_id FROM session_history')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history.")
+        logger.debug(
+            u"Altering database. Updating database table session_history.")
         c_db.execute(
             'ALTER TABLE session_history ADD COLUMN reference_id INTEGER DEFAULT 0'
         )
@@ -1201,64 +1108,56 @@ def dbcheck():
     try:
         c_db.execute('SELECT bandwidth FROM session_history')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history.")
+        logger.debug(
+            u"Altering database. Updating database table session_history.")
         c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN platform_version TEXT'
-        )
+            'ALTER TABLE session_history ADD COLUMN platform_version TEXT')
+        c_db.execute('ALTER TABLE session_history ADD COLUMN product TEXT')
         c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN product TEXT'
-        )
+            'ALTER TABLE session_history ADD COLUMN product_version TEXT')
+        c_db.execute('ALTER TABLE session_history ADD COLUMN profile TEXT')
         c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN product_version TEXT'
-        )
+            'ALTER TABLE session_history ADD COLUMN bandwidth INTEGER')
+        c_db.execute('ALTER TABLE session_history ADD COLUMN location TEXT')
         c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN profile TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN bandwidth INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN location TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN quality_profile TEXT'
-        )
+            'ALTER TABLE session_history ADD COLUMN quality_profile TEXT')
 
     # Upgrade session_history table from earlier versions
     try:
         c_db.execute('SELECT secure FROM session_history')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history.")
-        c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN secure INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE session_history ADD COLUMN relayed INTEGER'
-        )
+        logger.debug(
+            u"Altering database. Updating database table session_history.")
+        c_db.execute('ALTER TABLE session_history ADD COLUMN secure INTEGER')
+        c_db.execute('ALTER TABLE session_history ADD COLUMN relayed INTEGER')
 
     # Upgrade session_history_metadata table from earlier versions
     try:
         c_db.execute('SELECT full_title FROM session_history_metadata')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_metadata.")
-        c_db.execute(
-            'ALTER TABLE session_history_metadata ADD COLUMN full_title TEXT'
+        logger.debug(
+            u"Altering database. Updating database table session_history_metadata."
         )
+        c_db.execute(
+            'ALTER TABLE session_history_metadata ADD COLUMN full_title TEXT')
 
     # Upgrade session_history_metadata table from earlier versions
     try:
         c_db.execute('SELECT tagline FROM session_history_metadata')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_metadata.")
-        c_db.execute(
-            'ALTER TABLE session_history_metadata ADD COLUMN tagline TEXT'
+        logger.debug(
+            u"Altering database. Updating database table session_history_metadata."
         )
+        c_db.execute(
+            'ALTER TABLE session_history_metadata ADD COLUMN tagline TEXT')
 
     # Upgrade session_history_metadata table from earlier versions
     try:
         c_db.execute('SELECT section_id FROM session_history_metadata')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_metadata.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_metadata."
+        )
         c_db.execute(
             'ALTER TABLE session_history_metadata ADD COLUMN section_id INTEGER'
         )
@@ -1267,25 +1166,31 @@ def dbcheck():
     try:
         c_db.execute('SELECT labels FROM session_history_metadata')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_metadata.")
-        c_db.execute(
-            'ALTER TABLE session_history_metadata ADD COLUMN labels TEXT'
+        logger.debug(
+            u"Altering database. Updating database table session_history_metadata."
         )
+        c_db.execute(
+            'ALTER TABLE session_history_metadata ADD COLUMN labels TEXT')
 
     # Upgrade session_history_metadata table from earlier versions
     try:
         c_db.execute('SELECT original_title FROM session_history_metadata')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_metadata.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_metadata."
+        )
         c_db.execute(
             'ALTER TABLE session_history_metadata ADD COLUMN original_title TEXT'
         )
 
     # Upgrade session_history_media_info table from earlier versions
     try:
-        c_db.execute('SELECT transcode_decision FROM session_history_media_info')
+        c_db.execute(
+            'SELECT transcode_decision FROM session_history_media_info')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_media_info.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_media_info."
+        )
         c_db.execute(
             'ALTER TABLE session_history_media_info ADD COLUMN transcode_decision TEXT'
         )
@@ -1300,7 +1205,9 @@ def dbcheck():
     try:
         c_db.execute('SELECT subtitles FROM session_history_media_info')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_media_info.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_media_info."
+        )
         c_db.execute(
             'ALTER TABLE session_history_media_info ADD COLUMN video_bit_depth INTEGER'
         )
@@ -1420,16 +1327,21 @@ def dbcheck():
     try:
         c_db.execute('SELECT subtitle_codec FROM session_history_media_info')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_media_info.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_media_info."
+        )
         c_db.execute(
             'ALTER TABLE session_history_media_info ADD COLUMN subtitle_codec TEXT '
         )
 
     # Upgrade session_history_media_info table from earlier versions
     try:
-        c_db.execute('SELECT synced_version_profile FROM session_history_media_info')
+        c_db.execute(
+            'SELECT synced_version_profile FROM session_history_media_info')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_media_info.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_media_info."
+        )
         c_db.execute(
             'ALTER TABLE session_history_media_info ADD COLUMN synced_version_profile TEXT '
         )
@@ -1439,9 +1351,12 @@ def dbcheck():
 
     # Upgrade session_history_media_info table from earlier versions
     try:
-        c_db.execute('SELECT transcode_hw_decoding FROM session_history_media_info')
+        c_db.execute(
+            'SELECT transcode_hw_decoding FROM session_history_media_info')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table session_history_media_info.")
+        logger.debug(
+            u"Altering database. Updating database table session_history_media_info."
+        )
         c_db.execute(
             'ALTER TABLE session_history_media_info ADD COLUMN transcode_hw_decoding INTEGER '
         )
@@ -1454,10 +1369,13 @@ def dbcheck():
 
     # Upgrade session_history_media_info table from earlier versions
     try:
-        result = c_db.execute('SELECT stream_container FROM session_history_media_info '
-                              'WHERE stream_container IS NULL').fetchall()
+        result = c_db.execute(
+            'SELECT stream_container FROM session_history_media_info '
+            'WHERE stream_container IS NULL').fetchall()
         if len(result) > 0:
-            logger.debug(u"Altering database. Removing NULL values from session_history_media_info table.")
+            logger.debug(
+                u"Altering database. Removing NULL values from session_history_media_info table."
+            )
             c_db.execute(
                 'UPDATE session_history_media_info SET stream_container = "" WHERE stream_container IS NULL '
             )
@@ -1471,7 +1389,9 @@ def dbcheck():
                 'UPDATE session_history_media_info SET stream_subtitle_codec = "" WHERE stream_subtitle_codec IS NULL '
             )
     except sqlite3.OperationalError:
-        logger.warn(u"Unable to remove NULL values from session_history_media_info table.")
+        logger.warn(
+            u"Unable to remove NULL values from session_history_media_info table."
+        )
 
     # Upgrade users table from earlier versions
     try:
@@ -1479,8 +1399,7 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
         c_db.execute(
-            'ALTER TABLE users ADD COLUMN do_notify INTEGER DEFAULT 1'
-        )
+            'ALTER TABLE users ADD COLUMN do_notify INTEGER DEFAULT 1')
 
     # Upgrade users table from earlier versions
     try:
@@ -1488,17 +1407,14 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
         c_db.execute(
-            'ALTER TABLE users ADD COLUMN keep_history INTEGER DEFAULT 1'
-        )
+            'ALTER TABLE users ADD COLUMN keep_history INTEGER DEFAULT 1')
 
     # Upgrade users table from earlier versions
     try:
         c_db.execute('SELECT custom_avatar_url FROM users')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN custom_avatar_url TEXT'
-        )
+        c_db.execute('ALTER TABLE users ADD COLUMN custom_avatar_url TEXT')
 
     # Upgrade users table from earlier versions
     try:
@@ -1506,8 +1422,7 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
         c_db.execute(
-            'ALTER TABLE users ADD COLUMN deleted_user INTEGER DEFAULT 0'
-        )
+            'ALTER TABLE users ADD COLUMN deleted_user INTEGER DEFAULT 0')
 
     # Upgrade users table from earlier versions
     try:
@@ -1515,56 +1430,35 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
         c_db.execute(
-            'ALTER TABLE users ADD COLUMN allow_guest INTEGER DEFAULT 0'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN user_token TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN server_token TEXT'
-        )
+            'ALTER TABLE users ADD COLUMN allow_guest INTEGER DEFAULT 0')
+        c_db.execute('ALTER TABLE users ADD COLUMN user_token TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN server_token TEXT')
 
     # Upgrade users table from earlier versions
     try:
         c_db.execute('SELECT shared_libraries FROM users')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN shared_libraries TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN filter_all TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN filter_movies TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN filter_tv TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN filter_music TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN filter_photos TEXT'
-        )
+        c_db.execute('ALTER TABLE users ADD COLUMN shared_libraries TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN filter_all TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN filter_movies TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN filter_tv TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN filter_music TEXT')
+        c_db.execute('ALTER TABLE users ADD COLUMN filter_photos TEXT')
 
     # Upgrade users table from earlier versions
     try:
         c_db.execute('SELECT is_admin FROM users')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table users.")
-        c_db.execute(
-            'ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0'
-        )
+        c_db.execute('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0')
 
     # Upgrade notify_log table from earlier versions
     try:
         c_db.execute('SELECT poster_url FROM notify_log')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table notify_log.")
-        c_db.execute(
-            'ALTER TABLE notify_log ADD COLUMN poster_url TEXT'
-        )
+        c_db.execute('ALTER TABLE notify_log ADD COLUMN poster_url TEXT')
 
     # Upgrade notify_log table from earlier versions (populate table with data from notify_log)
     try:
@@ -1597,21 +1491,15 @@ def dbcheck():
             'UNION ALL SELECT session_key, rating_key, user_id, user, agent_id, agent_name, poster_url, '
             'on_created, "created" FROM notify_log WHERE on_created '
             'ORDER BY timestamp ')
-        c_db.execute(
-            'DROP TABLE notify_log'
-        )
-        c_db.execute(
-            'ALTER TABLE notify_log_temp RENAME TO notify_log'
-        )
+        c_db.execute('DROP TABLE notify_log')
+        c_db.execute('ALTER TABLE notify_log_temp RENAME TO notify_log')
 
     # Upgrade notify_log table from earlier versions
     try:
         c_db.execute('SELECT notifier_id FROM notify_log')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table notify_log.")
-        c_db.execute(
-            'ALTER TABLE notify_log ADD COLUMN notifier_id INTEGER'
-        )
+        c_db.execute('ALTER TABLE notify_log ADD COLUMN notifier_id INTEGER')
 
     # Upgrade notify_log table from earlier versions
     try:
@@ -1619,56 +1507,54 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table notify_log.")
         c_db.execute(
-            'ALTER TABLE notify_log ADD COLUMN success INTEGER DEFAULT 0'
-        )
-        c_db.execute(
-            'UPDATE notify_log SET success = 1'
-        )
+            'ALTER TABLE notify_log ADD COLUMN success INTEGER DEFAULT 0')
+        c_db.execute('UPDATE notify_log SET success = 1')
 
     # Upgrade newsletter_log table from earlier versions
     try:
         c_db.execute('SELECT start_time FROM newsletter_log')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table newsletter_log.")
+        logger.debug(
+            u"Altering database. Updating database table newsletter_log.")
         c_db.execute(
-            'ALTER TABLE newsletter_log ADD COLUMN start_time INTEGER'
-        )
-        c_db.execute(
-            'ALTER TABLE newsletter_log ADD COLUMN end_time INTEGER'
-        )
+            'ALTER TABLE newsletter_log ADD COLUMN start_time INTEGER')
+        c_db.execute('ALTER TABLE newsletter_log ADD COLUMN end_time INTEGER')
 
     # Upgrade newsletter_log table from earlier versions
     try:
         c_db.execute('SELECT filename FROM newsletter_log')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table newsletter_log.")
-        c_db.execute(
-            'ALTER TABLE newsletter_log ADD COLUMN filename TEXT'
-        )
+        logger.debug(
+            u"Altering database. Updating database table newsletter_log.")
+        c_db.execute('ALTER TABLE newsletter_log ADD COLUMN filename TEXT')
 
     # Upgrade newsletter_log table from earlier versions
     try:
         c_db.execute('SELECT email_msg_id FROM newsletter_log')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table newsletter_log.")
-        c_db.execute(
-            'ALTER TABLE newsletter_log ADD COLUMN email_msg_id TEXT'
-        )
+        logger.debug(
+            u"Altering database. Updating database table newsletter_log.")
+        c_db.execute('ALTER TABLE newsletter_log ADD COLUMN email_msg_id TEXT')
 
     # Upgrade newsletters table from earlier versions
     try:
         c_db.execute('SELECT id_name FROM newsletters')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table newsletters.")
+        logger.debug(
+            u"Altering database. Updating database table newsletters.")
         c_db.execute(
             'ALTER TABLE newsletters ADD COLUMN id_name TEXT NOT NULL DEFAULT ""'
         )
 
     # Upgrade library_sections table from earlier versions (remove UNIQUE constraint on section_id)
     try:
-        result = c_db.execute('SELECT SQL FROM sqlite_master WHERE type="table" AND name="library_sections"').fetchone()
+        result = c_db.execute(
+            'SELECT SQL FROM sqlite_master WHERE type="table" AND name="library_sections"'
+        ).fetchone()
         if 'section_id INTEGER UNIQUE' in result[0]:
-            logger.debug(u"Altering database. Removing unique constraint on section_id from library_sections table.")
+            logger.debug(
+                u"Altering database. Removing unique constraint on section_id from library_sections table."
+            )
             c_db.execute(
                 'CREATE TABLE library_sections_temp (id INTEGER PRIMARY KEY AUTOINCREMENT, '
                 'server_id TEXT, section_id INTEGER, section_name TEXT, section_type TEXT, '
@@ -1683,48 +1569,50 @@ def dbcheck():
                 'SELECT id, server_id, section_id, section_name, section_type, '
                 'thumb, custom_thumb_url, art, count, parent_count, child_count, do_notify, do_notify_created, '
                 'keep_history, deleted_section '
-                'FROM library_sections'
-            )
+                'FROM library_sections')
+            c_db.execute('DROP TABLE library_sections')
             c_db.execute(
-                'DROP TABLE library_sections'
-            )
-            c_db.execute(
-                'ALTER TABLE library_sections_temp RENAME TO library_sections'
-            )
+                'ALTER TABLE library_sections_temp RENAME TO library_sections')
     except sqlite3.OperationalError:
-        logger.warn(u"Unable to remove section_id unique constraint from library_sections.")
+        logger.warn(
+            u"Unable to remove section_id unique constraint from library_sections."
+        )
         try:
-            c_db.execute(
-                'DROP TABLE library_sections_temp'
-            )
+            c_db.execute('DROP TABLE library_sections_temp')
         except:
             pass
 
     # Upgrade library_sections table from earlier versions (remove duplicated libraries)
     try:
-        result = c_db.execute('SELECT * FROM library_sections WHERE server_id = ""').fetchall()
+        result = c_db.execute(
+            'SELECT * FROM library_sections WHERE server_id = ""').fetchall()
         if len(result) > 0:
-            logger.debug(u"Altering database. Removing duplicate libraries from library_sections table.")
-            c_db.execute(
-                'DELETE FROM library_sections WHERE server_id = ""'
+            logger.debug(
+                u"Altering database. Removing duplicate libraries from library_sections table."
             )
+            c_db.execute('DELETE FROM library_sections WHERE server_id = ""')
     except sqlite3.OperationalError:
-        logger.warn(u"Unable to remove duplicate libraries from library_sections table.")
+        logger.warn(
+            u"Unable to remove duplicate libraries from library_sections table."
+        )
 
     # Upgrade library_sections table from earlier versions
     try:
         c_db.execute('SELECT agent FROM library_sections')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table library_sections.")
-        c_db.execute(
-            'ALTER TABLE library_sections ADD COLUMN agent TEXT'
-        )
+        logger.debug(
+            u"Altering database. Updating database table library_sections.")
+        c_db.execute('ALTER TABLE library_sections ADD COLUMN agent TEXT')
 
     # Upgrade users table from earlier versions (remove UNIQUE constraint on username)
     try:
-        result = c_db.execute('SELECT SQL FROM sqlite_master WHERE type="table" AND name="users"').fetchone()
+        result = c_db.execute(
+            'SELECT SQL FROM sqlite_master WHERE type="table" AND name="users"'
+        ).fetchone()
         if 'username TEXT NOT NULL UNIQUE' in result[0]:
-            logger.debug(u"Altering database. Removing unique constraint on username from users table.")
+            logger.debug(
+                u"Altering database. Removing unique constraint on username from users table."
+            )
             c_db.execute(
                 'CREATE TABLE users_temp (id INTEGER PRIMARY KEY AUTOINCREMENT, '
                 'user_id INTEGER DEFAULT NULL UNIQUE, username TEXT NOT NULL, friendly_name TEXT, '
@@ -1737,31 +1625,26 @@ def dbcheck():
                 'email, is_home_user, is_allow_sync, is_restricted, do_notify, keep_history, deleted_user) '
                 'SELECT id, user_id, username, friendly_name, thumb, custom_avatar_url, '
                 'email, is_home_user, is_allow_sync, is_restricted, do_notify, keep_history, deleted_user '
-                'FROM users'
-            )
-            c_db.execute(
-                'DROP TABLE users'
-            )
-            c_db.execute(
-                'ALTER TABLE users_temp RENAME TO users'
-            )
+                'FROM users')
+            c_db.execute('DROP TABLE users')
+            c_db.execute('ALTER TABLE users_temp RENAME TO users')
     except sqlite3.OperationalError:
         logger.warn(u"Unable to remove username unique constraint from users.")
         try:
-            c_db.execute(
-                'DROP TABLE users_temp'
-            )
+            c_db.execute('DROP TABLE users_temp')
         except:
             pass
 
     # Upgrade mobile_devices table from earlier versions
     try:
-        result = c_db.execute('SELECT SQL FROM sqlite_master WHERE type="table" AND name="mobile_devices"').fetchone()
+        result = c_db.execute(
+            'SELECT SQL FROM sqlite_master WHERE type="table" AND name="mobile_devices"'
+        ).fetchone()
         if 'device_token TEXT NOT NULL UNIQUE' in result[0]:
-            logger.debug(u"Altering database. Dropping and recreating mobile_devices table.")
-            c_db.execute(
-                'DROP TABLE mobile_devices'
+            logger.debug(
+                u"Altering database. Dropping and recreating mobile_devices table."
             )
+            c_db.execute('DROP TABLE mobile_devices')
             c_db.execute(
                 'CREATE TABLE IF NOT EXISTS mobile_devices (id INTEGER PRIMARY KEY AUTOINCREMENT, '
                 'device_id TEXT NOT NULL UNIQUE, device_token TEXT, device_name TEXT, friendly_name TEXT)'
@@ -1774,22 +1657,18 @@ def dbcheck():
     try:
         c_db.execute('SELECT last_seen FROM mobile_devices')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table mobile_devices.")
-        c_db.execute(
-            'ALTER TABLE mobile_devices ADD COLUMN last_seen INTEGER'
-        )
+        logger.debug(
+            u"Altering database. Updating database table mobile_devices.")
+        c_db.execute('ALTER TABLE mobile_devices ADD COLUMN last_seen INTEGER')
 
     # Upgrade notifiers table from earlier versions
     try:
         c_db.execute('SELECT custom_conditions FROM notifiers')
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table notifiers.")
+        c_db.execute('ALTER TABLE notifiers ADD COLUMN custom_conditions TEXT')
         c_db.execute(
-            'ALTER TABLE notifiers ADD COLUMN custom_conditions TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE notifiers ADD COLUMN custom_conditions_logic TEXT'
-        )
+            'ALTER TABLE notifiers ADD COLUMN custom_conditions_logic TEXT')
 
     # Upgrade notifiers table from earlier versions
     try:
@@ -1797,44 +1676,30 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table notifiers.")
         c_db.execute(
-            'ALTER TABLE notifiers ADD COLUMN on_change INTEGER DEFAULT 0'
-        )
-        c_db.execute(
-            'ALTER TABLE notifiers ADD COLUMN on_change_subject TEXT'
-        )
-        c_db.execute(
-            'ALTER TABLE notifiers ADD COLUMN on_change_body TEXT'
-        )
+            'ALTER TABLE notifiers ADD COLUMN on_change INTEGER DEFAULT 0')
+        c_db.execute('ALTER TABLE notifiers ADD COLUMN on_change_subject TEXT')
+        c_db.execute('ALTER TABLE notifiers ADD COLUMN on_change_body TEXT')
 
     # Upgrade tvmaze_lookup table from earlier versions
     try:
         c_db.execute('SELECT rating_key FROM tvmaze_lookup')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table tvmaze_lookup.")
-        c_db.execute(
-            'ALTER TABLE tvmaze_lookup ADD COLUMN rating_key INTEGER'
-        )
-        c_db.execute(
-            'DROP INDEX IF EXISTS idx_tvmaze_lookup_thetvdb_id'
-        )
-        c_db.execute(
-            'DROP INDEX IF EXISTS idx_tvmaze_lookup_imdb_id'
-        )
+        logger.debug(
+            u"Altering database. Updating database table tvmaze_lookup.")
+        c_db.execute('ALTER TABLE tvmaze_lookup ADD COLUMN rating_key INTEGER')
+        c_db.execute('DROP INDEX IF EXISTS idx_tvmaze_lookup_thetvdb_id')
+        c_db.execute('DROP INDEX IF EXISTS idx_tvmaze_lookup_imdb_id')
 
     # Upgrade themoviedb_lookup table from earlier versions
     try:
         c_db.execute('SELECT rating_key FROM themoviedb_lookup')
     except sqlite3.OperationalError:
-        logger.debug(u"Altering database. Updating database table themoviedb_lookup.")
+        logger.debug(
+            u"Altering database. Updating database table themoviedb_lookup.")
         c_db.execute(
-            'ALTER TABLE themoviedb_lookup ADD COLUMN rating_key INTEGER'
-        )
-        c_db.execute(
-            'DROP INDEX IF EXISTS idx_themoviedb_lookup_thetvdb_id'
-        )
-        c_db.execute(
-            'DROP INDEX IF EXISTS idx_themoviedb_lookup_imdb_id'
-        )
+            'ALTER TABLE themoviedb_lookup ADD COLUMN rating_key INTEGER')
+        c_db.execute('DROP INDEX IF EXISTS idx_themoviedb_lookup_thetvdb_id')
+        c_db.execute('DROP INDEX IF EXISTS idx_themoviedb_lookup_imdb_id')
 
     # Upgrade user_login table from earlier versions
     try:
@@ -1842,12 +1707,12 @@ def dbcheck():
     except sqlite3.OperationalError:
         logger.debug(u"Altering database. Updating database table user_login.")
         c_db.execute(
-            'ALTER TABLE user_login ADD COLUMN success INTEGER DEFAULT 1'
-        )
+            'ALTER TABLE user_login ADD COLUMN success INTEGER DEFAULT 1')
 
     # Rename notifiers in the database
-    result = c_db.execute('SELECT agent_label FROM notifiers '
-                          'WHERE agent_label = "XBMC" OR agent_label = "OSX Notify"').fetchone()
+    result = c_db.execute(
+        'SELECT agent_label FROM notifiers '
+        'WHERE agent_label = "XBMC" OR agent_label = "OSX Notify"').fetchone()
     if result:
         logger.debug(u"Altering database. Renaming notifiers.")
         c_db.execute(
@@ -1861,7 +1726,8 @@ def dbcheck():
     result = c_db.execute('SELECT id FROM users WHERE username = "Local"')
     if not result.fetchone():
         logger.debug(u"User 'Local' does not exist. Adding user.")
-        c_db.execute('INSERT INTO users (user_id, username) VALUES (0, "Local")')
+        c_db.execute(
+            'INSERT INTO users (user_id, username) VALUES (0, "Local")')
 
     # Create table indices
     c_db.execute(
@@ -1877,18 +1743,26 @@ def dbcheck():
     # Migrate poster_urls to imgur_lookup table
     try:
         db = database.MonitorDatabase()
-        result = db.select('SELECT SQL FROM sqlite_master WHERE type="table" AND name="poster_urls"')
+        result = db.select(
+            'SELECT SQL FROM sqlite_master WHERE type="table" AND name="poster_urls"'
+        )
         if result:
             result = db.select('SELECT * FROM poster_urls')
-            logger.debug(u"Altering database. Updating database table imgur_lookup.")
+            logger.debug(
+                u"Altering database. Updating database table imgur_lookup.")
 
             data_factory = datafactory.DataFactory()
 
             for row in result:
                 img_hash = notification_handler.set_hash_image_info(
-                    rating_key=row['rating_key'], width=1000, height=1500, fallback='poster')
-                data_factory.set_img_info(img_hash=img_hash, img_title=row['poster_title'],
-                                          img_url=row['poster_url'], delete_hash=row['delete_hash'],
+                    rating_key=row['rating_key'],
+                    width=1000,
+                    height=1500,
+                    fallback='poster')
+                data_factory.set_img_info(img_hash=img_hash,
+                                          img_title=row['poster_title'],
+                                          img_url=row['poster_url'],
+                                          delete_hash=row['delete_hash'],
                                           service='imgur')
 
             db.action('DROP TABLE poster_urls')
@@ -1937,7 +1811,8 @@ def shutdown(restart=False, update=False, checkout=False):
         try:
             versioncheck.checkout_git_branch()
         except Exception as e:
-            logger.warn(u"Tautulli failed to switch git branch: %s. Restarting." % e)
+            logger.warn(
+                u"Tautulli failed to switch git branch: %s. Restarting." % e)
 
     if CREATEPID:
         logger.info(u"Removing pidfile %s", PIDFILE)
@@ -1991,14 +1866,17 @@ def initialize_tracker():
         'appVersion': common.RELEASE,
         'appId': plexpy.INSTALL_TYPE,
         'appInstallerId': plexpy.CONFIG.GIT_BRANCH,
-        'dimension1': '{} {}'.format(common.PLATFORM, common.PLATFORM_RELEASE),  # App Platform
+        'dimension1': '{} {}'.format(common.PLATFORM,
+                                     common.PLATFORM_RELEASE),  # App Platform
         'dimension2': common.PLATFORM_LINUX_DISTRO,  # Linux Distro
         'userLanguage': plexpy.SYS_LANGUAGE,
         'documentEncoding': plexpy.SYS_ENCODING,
         'noninteractive': True
-        }
+    }
 
-    tracker = Tracker.create('UA-111522699-2', client_id=CONFIG.PMS_UUID, hash_client_id=True,
+    tracker = Tracker.create('UA-111522699-2',
+                             client_id=CONFIG.PMS_UUID,
+                             hash_client_id=True,
                              user_agent=common.USER_AGENT)
     tracker.set(data)
 
@@ -2021,7 +1899,9 @@ def analytics_event(category, action, label=None, value=None, **kwargs):
         try:
             TRACKER.send('event', data)
         except Exception as e:
-            logger.warn(u"Failed to send analytics event for category '%s', action '%s': %s" % (category, action, e))
+            logger.warn(
+                u"Failed to send analytics event for category '%s', action '%s': %s"
+                % (category, action, e))
 
 
 def check_folder_writable(folder, fallback, name):
@@ -2032,7 +1912,8 @@ def check_folder_writable(folder, fallback, name):
         try:
             os.makedirs(folder)
         except OSError as e:
-            logger.error(u"Could not create %s dir '%s': %s" % (name, folder, e))
+            logger.error(u"Could not create %s dir '%s': %s" %
+                         (name, folder, e))
             if folder != fallback:
                 logger.warn(u"Falling back to %s dir '%s'" % (name, fallback))
                 return check_folder_writable(None, fallback, name)

@@ -23,29 +23,37 @@ def get_session_info():
     """
     Returns the session info for the user session
     """
-    _session = {'user_id': None,
-                'user': None,
-                'user_group': 'admin',
-                'exp': None}
+    _session = {
+        'user_id': None,
+        'user': None,
+        'user_group': 'admin',
+        'exp': None
+    }
 
     if isinstance(cherrypy.request.login, dict):
         return cherrypy.request.login
 
     return _session
 
+
 def get_session_user():
     """
     Returns the user_id for the current logged in session
     """
     _session = get_session_info()
-    return _session['user'] if _session['user_group'] == 'guest' and _session['user'] else None
+    return _session['user'] if _session['user_group'] == 'guest' and _session[
+        'user'] else None
+
 
 def get_session_user_id():
     """
     Returns the user_id for the current logged in session
     """
     _session = get_session_info()
-    return str(_session['user_id']) if _session['user_group'] == 'guest' and _session['user_id'] else None
+    return str(
+        _session['user_id']
+    ) if _session['user_group'] == 'guest' and _session['user_id'] else None
+
 
 def get_session_shared_libraries():
     """
@@ -53,6 +61,7 @@ def get_session_shared_libraries():
     """
     user_details = users.Users().get_details(user_id=get_session_user_id())
     return tuple(str(s) for s in user_details['shared_libraries'])
+
 
 def get_session_library_filters():
     """
@@ -64,6 +73,7 @@ def get_session_library_filters():
     """
     filters = users.Users().get_filters(user_id=get_session_user_id())
     return filters
+
 
 def get_session_library_filters_type(filters, media_type=None):
     """
@@ -89,6 +99,7 @@ def get_session_library_filters_type(filters, media_type=None):
 
     return content_rating, tuple(f.lower() for f in labels)
 
+
 def allow_session_user(user_id):
     """
     Returns True or False if the user_id is allowed for the current logged in session
@@ -97,6 +108,7 @@ def allow_session_user(user_id):
     if session_user_id and str(user_id) != session_user_id:
         return False
     return True
+
 
 def allow_session_library(section_id):
     """
@@ -107,13 +119,14 @@ def allow_session_library(section_id):
         return False
     return True
 
+
 def friendly_name_to_username(list_of_dicts):
     """
     Reverts the friendly name back to the username of the current logged in session
     """
     session_user = get_session_user()
     session_user_id = get_session_user_id()
-    
+
     if session_user_id:
         for d in list_of_dicts:
             if 'friendly_name' in d and d['friendly_name'] != session_user:
@@ -121,12 +134,13 @@ def friendly_name_to_username(list_of_dicts):
 
     return list_of_dicts
 
+
 def filter_session_info(list_of_dicts, filter_key=None):
     """
     Filters a list of dictionary items to only return the info for the current logged in session
     """
     session_user_id = get_session_user_id()
-    
+
     if not session_user_id:
         return list_of_dicts
 
@@ -136,18 +150,21 @@ def filter_session_info(list_of_dicts, filter_key=None):
     list_of_dicts = friendly_name_to_username(list_of_dicts)
 
     if filter_key == 'user_id' and session_user_id:
-        return [d for d in list_of_dicts if str(d.get('user_id','')) == session_user_id]
+        return [
+            d for d in list_of_dicts
+            if str(d.get('user_id', '')) == session_user_id
+        ]
 
     elif filter_key == 'section_id' and session_library_ids:
         new_list_of_dicts = []
 
         for d in list_of_dicts:
-            if str(d.get('section_id','')) not in session_library_ids:
+            if str(d.get('section_id', '')) not in session_library_ids:
                 continue
 
             if d.get('media_type'):
-                f_content_rating, f_labels = get_session_library_filters_type(session_library_filters,
-                                                                              media_type=d['media_type'])
+                f_content_rating, f_labels = get_session_library_filters_type(
+                    session_library_filters, media_type=d['media_type'])
 
                 d_content_rating = d.get('content_rating', '')
                 d_labels = tuple(f.lower() for f in d.get('labels', ()))
@@ -162,7 +179,8 @@ def filter_session_info(list_of_dicts, filter_key=None):
                     if d_content_rating in f_content_rating:
                         keep = True
                 elif f_content_rating and f_labels:
-                    if d_content_rating in f_content_rating or set(d_labels).intersection(set(f_labels)):
+                    if d_content_rating in f_content_rating or set(
+                            d_labels).intersection(set(f_labels)):
                         keep = True
 
             if keep:
@@ -171,6 +189,7 @@ def filter_session_info(list_of_dicts, filter_key=None):
         return new_list_of_dicts
 
     return list_of_dicts
+
 
 def mask_session_info(list_of_dicts, mask_metadata=True):
     """
@@ -185,52 +204,55 @@ def mask_session_info(list_of_dicts, mask_metadata=True):
     session_library_ids = get_session_shared_libraries()
     session_library_filters = get_session_library_filters()
 
-    keys_to_mask = {'user_id': '',
-                    'user': 'Plex User',
-                    'friendly_name': 'Plex User',
-                    'user_thumb': common.DEFAULT_USER_THUMB,
-                    'ip_address': 'N/A',
-                    'machine_id': '',
-                    'player': 'Player'
-                    }
+    keys_to_mask = {
+        'user_id': '',
+        'user': 'Plex User',
+        'friendly_name': 'Plex User',
+        'user_thumb': common.DEFAULT_USER_THUMB,
+        'ip_address': 'N/A',
+        'machine_id': '',
+        'player': 'Player'
+    }
 
-    metadata_to_mask = {'media_index': '0',
-                        'parent_media_index': '0',
-                        'art': common.DEFAULT_ART,
-                        'parent_thumb': common.DEFAULT_POSTER_THUMB,
-                        'grandparent_thumb': common.DEFAULT_POSTER_THUMB,
-                        'thumb': common.DEFAULT_POSTER_THUMB,
-                        'bif_thumb': '',
-                        'title': 'Plex Media',
-                        'parent_title': 'Plex Media',
-                        'grandparent_title': 'Plex Media',
-                        'original_title': 'Plex Media',
-                        'rating_key': '',
-                        'parent_rating_key': '',
-                        'grandparent_rating_key': '',
-                        'year': '',
-                        'last_played': 'Plex Media'
-                        }
+    metadata_to_mask = {
+        'media_index': '0',
+        'parent_media_index': '0',
+        'art': common.DEFAULT_ART,
+        'parent_thumb': common.DEFAULT_POSTER_THUMB,
+        'grandparent_thumb': common.DEFAULT_POSTER_THUMB,
+        'thumb': common.DEFAULT_POSTER_THUMB,
+        'bif_thumb': '',
+        'title': 'Plex Media',
+        'parent_title': 'Plex Media',
+        'grandparent_title': 'Plex Media',
+        'original_title': 'Plex Media',
+        'rating_key': '',
+        'parent_rating_key': '',
+        'grandparent_rating_key': '',
+        'year': '',
+        'last_played': 'Plex Media'
+    }
 
     list_of_dicts = friendly_name_to_username(list_of_dicts)
 
     for d in list_of_dicts:
-        if session_user_id and not (str(d.get('user_id')) == session_user_id or d.get('user') == session_user):
+        if session_user_id and not (str(d.get('user_id')) == session_user_id
+                                    or d.get('user') == session_user):
             for k, v in keys_to_mask.iteritems():
                 if k in d: d[k] = keys_to_mask[k]
 
         if not mask_metadata:
             continue
 
-        if str(d.get('section_id','')) not in session_library_ids:
+        if str(d.get('section_id', '')) not in session_library_ids:
             for k, v in metadata_to_mask.iteritems():
                 if k in d: d[k] = metadata_to_mask[k]
             continue
 
         media_type = d.get('media_type')
         if media_type:
-            f_content_rating, f_labels = get_session_library_filters_type(session_library_filters,
-                                                                      media_type=d['media_type'])
+            f_content_rating, f_labels = get_session_library_filters_type(
+                session_library_filters, media_type=d['media_type'])
 
             d_content_rating = d.get('content_rating', '')
             d_labels = tuple(f.lower() for f in d.get('labels', ()))
@@ -244,7 +266,8 @@ def mask_session_info(list_of_dicts, mask_metadata=True):
                 if d_content_rating in f_content_rating:
                     continue
             elif f_content_rating and f_labels:
-                if d_content_rating in f_content_rating or set(d_labels).intersection(set(f_labels)):
+                if d_content_rating in f_content_rating or set(
+                        d_labels).intersection(set(f_labels)):
                     continue
 
             for k, v in metadata_to_mask.iteritems():

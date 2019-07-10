@@ -13,9 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Tautulli.  If not, see <http://www.gnu.org/licenses/>.
 
-from logutils.queue import QueueHandler, QueueListener
-from logging import handlers
-
 import contextlib
 import errno
 import logging
@@ -25,9 +22,11 @@ import re
 import sys
 import threading
 import traceback
+from logging import handlers
 
-import plexpy
 import helpers
+import plexpy
+from logutils.queue import QueueHandler, QueueListener
 from plexpy.config import _BLACKLIST_KEYS, _WHITELIST_KEYS
 
 # These settings are for file logging only
@@ -67,6 +66,7 @@ class NoThreadFilter(logging.Filter):
     """
     Log filter for the current thread
     """
+
     def __init__(self, threadName):
         self.threadName = threadName
 
@@ -79,6 +79,7 @@ class BlacklistFilter(logging.Filter):
     """
     Log filter for blacklisted tokens and passwords
     """
+
     def __init__(self):
         pass
 
@@ -91,8 +92,10 @@ class BlacklistFilter(logging.Filter):
                 if item in record.msg:
                     record.msg = record.msg.replace(item, 8 * '*' + item[-2:])
                 if any(item in str(arg) for arg in record.args):
-                    record.args = tuple(arg.replace(item, 8 * '*' + item[-2:]) if isinstance(arg, basestring) else arg
-                                        for arg in record.args)
+                    record.args = tuple(
+                        arg.replace(item, 8 * '*' + item[-2:]
+                                    ) if isinstance(arg, basestring) else arg
+                        for arg in record.args)
             except:
                 pass
         return True
@@ -102,6 +105,7 @@ class PublicIPFilter(logging.Filter):
     """
     Log filter for public IP addresses
     """
+
     def __init__(self):
         pass
 
@@ -111,17 +115,23 @@ class PublicIPFilter(logging.Filter):
 
         try:
             # Currently only checking for ipv4 addresses
-            ipv4 = re.findall(r'[0-9]+(?:\.[0-9]+){3}(?!\d*-[a-z0-9]{6})', record.msg)
+            ipv4 = re.findall(r'[0-9]+(?:\.[0-9]+){3}(?!\d*-[a-z0-9]{6})',
+                              record.msg)
             for ip in ipv4:
                 if helpers.is_public_ip(ip):
-                    record.msg = record.msg.replace(ip, ip.partition('.')[0] + '.***.***.***')
+                    record.msg = record.msg.replace(
+                        ip,
+                        ip.partition('.')[0] + '.***.***.***')
 
             args = []
             for arg in record.args:
-                ipv4 = re.findall(r'[0-9]+(?:\.[0-9]+){3}(?!\d*-[a-z0-9]{6})', arg) if isinstance(arg, basestring) else []
+                ipv4 = re.findall(r'[0-9]+(?:\.[0-9]+){3}(?!\d*-[a-z0-9]{6})',
+                                  arg) if isinstance(arg, basestring) else []
                 for ip in ipv4:
                     if helpers.is_public_ip(ip):
-                        arg = arg.replace(ip, ip.partition('.')[0] + '.***.***.***')
+                        arg = arg.replace(
+                            ip,
+                            ip.partition('.')[0] + '.***.***.***')
                 args.append(arg)
             record.args = tuple(args)
         except:
@@ -134,18 +144,22 @@ class PlexTokenFilter(logging.Filter):
     """
     Log filter for X-Plex-Token
     """
+
     def __init__(self):
         pass
 
     def filter(self, record):
         try:
-            tokens = re.findall(r'X-Plex-Token(?:=|%3D)([a-zA-Z0-9]+)', record.msg)
+            tokens = re.findall(r'X-Plex-Token(?:=|%3D)([a-zA-Z0-9]+)',
+                                record.msg)
             for token in tokens:
                 record.msg = record.msg.replace(token, 8 * '*' + token[-2:])
 
             args = []
             for arg in record.args:
-                tokens = re.findall(r'X-Plex-Token(?:=|%3D)([a-zA-Z0-9]+)', arg) if isinstance(arg, basestring) else []
+                tokens = re.findall(
+                    r'X-Plex-Token(?:=|%3D)([a-zA-Z0-9]+)', arg) if isinstance(
+                        arg, basestring) else []
                 for token in tokens:
                     arg = arg.replace(token, 8 * '*' + token[-2:])
                 args.append(arg)
@@ -252,11 +266,15 @@ def initLogger(console=False, log_dir=False, verbose=False):
 
     # Setup file logger
     if log_dir:
-        file_formatter = logging.Formatter('%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s', '%Y-%m-%d %H:%M:%S')
+        file_formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)-7s :: %(threadName)s : %(message)s',
+            '%Y-%m-%d %H:%M:%S')
 
         # Main Tautulli logger
         filename = os.path.join(log_dir, FILENAME)
-        file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+        file_handler = handlers.RotatingFileHandler(filename,
+                                                    maxBytes=MAX_SIZE,
+                                                    backupCount=MAX_FILES)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(file_formatter)
 
@@ -264,7 +282,9 @@ def initLogger(console=False, log_dir=False, verbose=False):
 
         # Tautulli API logger
         filename = os.path.join(log_dir, FILENAME_API)
-        file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+        file_handler = handlers.RotatingFileHandler(filename,
+                                                    maxBytes=MAX_SIZE,
+                                                    backupCount=MAX_FILES)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(file_formatter)
 
@@ -272,7 +292,9 @@ def initLogger(console=False, log_dir=False, verbose=False):
 
         # Tautulli websocket logger
         filename = os.path.join(log_dir, FILENAME_PLEX_WEBSOCKET)
-        file_handler = handlers.RotatingFileHandler(filename, maxBytes=MAX_SIZE, backupCount=MAX_FILES)
+        file_handler = handlers.RotatingFileHandler(filename,
+                                                    maxBytes=MAX_SIZE,
+                                                    backupCount=MAX_FILES)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(file_formatter)
 
@@ -280,7 +302,9 @@ def initLogger(console=False, log_dir=False, verbose=False):
 
     # Setup console logger
     if console:
-        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s', '%Y-%m-%d %H:%M:%S')
+        console_formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s :: %(threadName)s : %(message)s',
+            '%Y-%m-%d %H:%M:%S')
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(console_formatter)
         console_handler.setLevel(logging.DEBUG)
@@ -300,7 +324,9 @@ def initLogger(console=False, log_dir=False, verbose=False):
     initHooks()
 
 
-def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True):
+def initHooks(global_exceptions=True,
+              thread_exceptions=True,
+              pass_original=True):
     """
     This method installs exception catching mechanisms. Any exception caught
     will pass through the exception hook, and will be logged to the logger as
@@ -343,6 +369,7 @@ def initHooks(global_exceptions=True, thread_exceptions=True, pass_original=True
                     raise
                 except:
                     excepthook(*sys.exc_info())
+
             self.run = new_run
 
         # Monkey patch the run() by monkey patching the __init__ method

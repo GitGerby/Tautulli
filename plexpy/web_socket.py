@@ -40,8 +40,12 @@ def start_thread():
         # Check for any existing sessions on start up
         activity_pinger.check_active_sessions(ws_request=True)
     except Exception as e:
-        logger.error(u"Tautulli WebSocket :: Failed to check for active sessions: %s." % e)
-        logger.warn(u"Tautulli WebSocket :: Attempt to fix by flushing temporary sessions...")
+        logger.error(
+            u"Tautulli WebSocket :: Failed to check for active sessions: %s." %
+            e)
+        logger.warn(
+            u"Tautulli WebSocket :: Attempt to fix by flushing temporary sessions..."
+        )
         database.delete_sessions()
 
     # Start the websocket listener on it's own thread
@@ -69,7 +73,9 @@ def on_disconnect():
         plexpy.PLEX_SERVER_UP = False
 
     if plexpy.PLEX_SERVER_UP:
-        logger.info(u"Tautulli WebSocket :: Unable to get a response from the server, Plex server is down.")
+        logger.info(
+            u"Tautulli WebSocket :: Unable to get a response from the server, Plex server is down."
+        )
         plexpy.NOTIFY_QUEUE.put({'notify_action': 'on_intdown'})
         plexpy.PLEX_SERVER_UP = False
 
@@ -110,7 +116,9 @@ def wait_pong():
     global pong_count
     pong_count += 1
 
-    logger.warning(u"Tautulli WebSocket :: Failed to receive pong from websocket, ping attempt %s." % str(pong_count))
+    logger.warning(
+        u"Tautulli WebSocket :: Failed to receive pong from websocket, ping attempt %s."
+        % str(pong_count))
 
     if pong_count >= plexpy.CONFIG.WEBSOCKET_CONNECTION_ATTEMPTS:
         pong_count = 0
@@ -130,13 +138,12 @@ def run():
     from websocket import create_connection
 
     if plexpy.CONFIG.PMS_SSL and plexpy.CONFIG.PMS_URL[:5] == 'https':
-        uri = plexpy.CONFIG.PMS_URL.replace('https://', 'wss://') + '/:/websockets/notifications'
+        uri = plexpy.CONFIG.PMS_URL.replace(
+            'https://', 'wss://') + '/:/websockets/notifications'
         secure = 'secure '
     else:
         uri = 'ws://%s:%s/:/websockets/notifications' % (
-            plexpy.CONFIG.PMS_IP,
-            plexpy.CONFIG.PMS_PORT
-        )
+            plexpy.CONFIG.PMS_IP, plexpy.CONFIG.PMS_PORT)
         secure = ''
 
     # Set authentication token (if one is available)
@@ -182,7 +189,8 @@ def run():
                 if reconnects > 1:
                     time.sleep(plexpy.CONFIG.WEBSOCKET_CONNECTION_TIMEOUT)
 
-                logger.warn(u"Tautulli WebSocket :: Reconnection attempt %s." % str(reconnects))
+                logger.warn(u"Tautulli WebSocket :: Reconnection attempt %s." %
+                            str(reconnects))
 
                 try:
                     plexpy.WEBSOCKET = create_connection(uri, header=header)
@@ -236,7 +244,9 @@ def process(opcode, data):
         logger.websocket_debug(data)
         info = json.loads(data)
     except Exception as e:
-        logger.warn(u"Tautulli WebSocket :: Error decoding message from websocket: %s" % e)
+        logger.warn(
+            u"Tautulli WebSocket :: Error decoding message from websocket: %s"
+            % e)
         logger.websocket_error(data)
         return False
 
@@ -247,29 +257,38 @@ def process(opcode, data):
         return False
 
     if type == 'playing':
-        time_line = info.get('PlaySessionStateNotification', info.get('_children', {}))
+        time_line = info.get('PlaySessionStateNotification',
+                             info.get('_children', {}))
 
         if not time_line:
-            logger.debug(u"Tautulli WebSocket :: Session found but unable to get timeline data.")
+            logger.debug(
+                u"Tautulli WebSocket :: Session found but unable to get timeline data."
+            )
             return False
 
         try:
             activity = activity_handler.ActivityHandler(timeline=time_line[0])
             activity.process()
         except Exception as e:
-            logger.error(u"Tautulli WebSocket :: Failed to process session data: %s." % e)
+            logger.error(
+                u"Tautulli WebSocket :: Failed to process session data: %s." %
+                e)
 
     if type == 'timeline':
         time_line = info.get('TimelineEntry', info.get('_children', {}))
 
         if not time_line:
-            logger.debug(u"Tautulli WebSocket :: Timeline event found but unable to get timeline data.")
+            logger.debug(
+                u"Tautulli WebSocket :: Timeline event found but unable to get timeline data."
+            )
             return False
 
         try:
             activity = activity_handler.TimelineHandler(timeline=time_line[0])
             activity.process()
         except Exception as e:
-            logger.error(u"Tautulli WebSocket :: Failed to process timeline data: %s." % e)
+            logger.error(
+                u"Tautulli WebSocket :: Failed to process timeline data: %s." %
+                e)
 
     return True

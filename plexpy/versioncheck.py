@@ -19,9 +19,9 @@ import re
 import subprocess
 import tarfile
 
-import plexpy
 import common
 import logger
+import plexpy
 import request
 
 
@@ -41,8 +41,13 @@ def runGit(args):
         cmd = cur_git + ' ' + args
 
         try:
-            logger.debug('Trying to execute: "' + cmd + '" with shell in ' + plexpy.PROG_DIR)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=plexpy.PROG_DIR)
+            logger.debug('Trying to execute: "' + cmd + '" with shell in ' +
+                         plexpy.PROG_DIR)
+            p = subprocess.Popen(cmd,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
+                                 shell=True,
+                                 cwd=plexpy.PROG_DIR)
             output, err = p.communicate()
             output = output.strip()
 
@@ -55,7 +60,9 @@ def runGit(args):
             logger.debug('Unable to find git with command ' + cmd)
             output = None
         elif 'fatal:' in output or err:
-            logger.error('Git returned bad info. Are you sure this is a git installation?')
+            logger.error(
+                'Git returned bad info. Are you sure this is a git installation?'
+            )
             output = None
         elif output:
             break
@@ -90,25 +97,35 @@ def getVersion():
             branch_name = plexpy.CONFIG.GIT_BRANCH
 
         else:
-            remote_branch, err = runGit('rev-parse --abbrev-ref --symbolic-full-name @{u}')
-            remote_branch = remote_branch.rsplit('/', 1) if remote_branch else []
+            remote_branch, err = runGit(
+                'rev-parse --abbrev-ref --symbolic-full-name @{u}')
+            remote_branch = remote_branch.rsplit('/',
+                                                 1) if remote_branch else []
             if len(remote_branch) == 2:
                 remote_name, branch_name = remote_branch
             else:
                 remote_name = branch_name = None
 
             if not remote_name and plexpy.CONFIG.GIT_REMOTE:
-                logger.error('Could not retrieve remote name from git. Falling back to %s.' % plexpy.CONFIG.GIT_REMOTE)
+                logger.error(
+                    'Could not retrieve remote name from git. Falling back to %s.'
+                    % plexpy.CONFIG.GIT_REMOTE)
                 remote_name = plexpy.CONFIG.GIT_REMOTE
             if not remote_name:
-                logger.error('Could not retrieve remote name from git. Defaulting to origin.')
+                logger.error(
+                    'Could not retrieve remote name from git. Defaulting to origin.'
+                )
                 branch_name = 'origin'
 
             if not branch_name and plexpy.CONFIG.GIT_BRANCH:
-                logger.error('Could not retrieve branch name from git. Falling back to %s.' % plexpy.CONFIG.GIT_BRANCH)
+                logger.error(
+                    'Could not retrieve branch name from git. Falling back to %s.'
+                    % plexpy.CONFIG.GIT_BRANCH)
                 branch_name = plexpy.CONFIG.GIT_BRANCH
             if not branch_name:
-                logger.error('Could not retrieve branch name from git. Defaulting to master.')
+                logger.error(
+                    'Could not retrieve branch name from git. Defaulting to master.'
+                )
                 branch_name = 'master'
 
         return cur_commit_hash, remote_name, branch_name
@@ -147,10 +164,14 @@ def check_update(auto_update=False, notify=False):
 
     if plexpy.WIN_SYS_TRAY_ICON:
         if plexpy.UPDATE_AVAILABLE:
-            icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/', plexpy.CONFIG.INTERFACE, 'images/logo_tray-update.ico')
+            icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/',
+                                plexpy.CONFIG.INTERFACE,
+                                'images/logo_tray-update.ico')
             hover_text = common.PRODUCT + ' - Update Available!'
         else:
-            icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/', plexpy.CONFIG.INTERFACE, 'images/logo_tray.ico')
+            icon = os.path.join(plexpy.PROG_DIR, 'data/interfaces/',
+                                plexpy.CONFIG.INTERFACE,
+                                'images/logo_tray.ico')
             hover_text = common.PRODUCT + ' - No Update Available'
         plexpy.WIN_SYS_TRAY_ICON.update(icon=icon, hover_text=hover_text)
 
@@ -160,14 +181,19 @@ def check_github(auto_update=False, notify=False):
 
     # Get the latest version available from github
     logger.info('Retrieving latest version information from GitHub')
-    url = 'https://api.github.com/repos/%s/%s/commits/%s' % (plexpy.CONFIG.GIT_USER,
-                                                             plexpy.CONFIG.GIT_REPO,
-                                                             plexpy.CONFIG.GIT_BRANCH)
-    if plexpy.CONFIG.GIT_TOKEN: url = url + '?access_token=%s' % plexpy.CONFIG.GIT_TOKEN
-    version = request.request_json(url, timeout=20, validator=lambda x: type(x) == dict)
+    url = 'https://api.github.com/repos/%s/%s/commits/%s' % (
+        plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO,
+        plexpy.CONFIG.GIT_BRANCH)
+    if plexpy.CONFIG.GIT_TOKEN:
+        url = url + '?access_token=%s' % plexpy.CONFIG.GIT_TOKEN
+    version = request.request_json(url,
+                                   timeout=20,
+                                   validator=lambda x: type(x) == dict)
 
     if version is None:
-        logger.warn('Could not get the latest version from GitHub. Are you running a local development version?')
+        logger.warn(
+            'Could not get the latest version from GitHub. Are you running a local development version?'
+        )
         return plexpy.CURRENT_VERSION
 
     plexpy.LATEST_VERSION = version['sha']
@@ -175,20 +201,26 @@ def check_github(auto_update=False, notify=False):
 
     # See how many commits behind we are
     if not plexpy.CURRENT_VERSION:
-        logger.info('You are running an unknown version of Tautulli. Run the updater to identify your version')
+        logger.info(
+            'You are running an unknown version of Tautulli. Run the updater to identify your version'
+        )
         return plexpy.LATEST_VERSION
 
     if plexpy.LATEST_VERSION == plexpy.CURRENT_VERSION:
         logger.info('Tautulli is up to date')
         return plexpy.LATEST_VERSION
 
-    logger.info('Comparing currently installed version with latest GitHub version')
-    url = 'https://api.github.com/repos/%s/%s/compare/%s...%s' % (plexpy.CONFIG.GIT_USER,
-                                                                  plexpy.CONFIG.GIT_REPO,
-                                                                  plexpy.LATEST_VERSION,
-                                                                  plexpy.CURRENT_VERSION)
-    if plexpy.CONFIG.GIT_TOKEN: url = url + '?access_token=%s' % plexpy.CONFIG.GIT_TOKEN
-    commits = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == dict)
+    logger.info(
+        'Comparing currently installed version with latest GitHub version')
+    url = 'https://api.github.com/repos/%s/%s/compare/%s...%s' % (
+        plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO, plexpy.LATEST_VERSION,
+        plexpy.CURRENT_VERSION)
+    if plexpy.CONFIG.GIT_TOKEN:
+        url = url + '?access_token=%s' % plexpy.CONFIG.GIT_TOKEN
+    commits = request.request_json(url,
+                                   timeout=20,
+                                   whitelist_status_code=404,
+                                   validator=lambda x: type(x) == dict)
 
     if commits is None:
         logger.warn('Could not get commits behind from GitHub.')
@@ -198,23 +230,34 @@ def check_github(auto_update=False, notify=False):
         plexpy.COMMITS_BEHIND = int(commits['behind_by'])
         logger.debug("In total, %d commits behind", plexpy.COMMITS_BEHIND)
     except KeyError:
-        logger.info('Cannot compare versions. Are you running a local development version?')
+        logger.info(
+            'Cannot compare versions. Are you running a local development version?'
+        )
         plexpy.COMMITS_BEHIND = 0
 
     if plexpy.COMMITS_BEHIND > 0:
-        logger.info('New version is available. You are %s commits behind' % plexpy.COMMITS_BEHIND)
+        logger.info('New version is available. You are %s commits behind' %
+                    plexpy.COMMITS_BEHIND)
 
-        url = 'https://api.github.com/repos/%s/%s/releases' % (plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO)
-        releases = request.request_json(url, timeout=20, whitelist_status_code=404, validator=lambda x: type(x) == list)
+        url = 'https://api.github.com/repos/%s/%s/releases' % (
+            plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO)
+        releases = request.request_json(url,
+                                        timeout=20,
+                                        whitelist_status_code=404,
+                                        validator=lambda x: type(x) == list)
 
         if releases is None:
             logger.warn('Could not get releases from GitHub.')
             return plexpy.LATEST_VERSION
 
         if plexpy.CONFIG.GIT_BRANCH == 'master':
-            release = next((r for r in releases if not r['prerelease']), releases[0])
+            release = next((r for r in releases if not r['prerelease']),
+                           releases[0])
         elif plexpy.CONFIG.GIT_BRANCH == 'beta':
-            release = next((r for r in releases if not r['tag_name'].endswith('-nightly')), releases[0])
+            release = next(
+                (r
+                 for r in releases if not r['tag_name'].endswith('-nightly')),
+                releases[0])
         elif plexpy.CONFIG.GIT_BRANCH == 'nightly':
             release = next((r for r in releases), releases[0])
         else:
@@ -223,10 +266,16 @@ def check_github(auto_update=False, notify=False):
         plexpy.LATEST_RELEASE = release['tag_name']
 
         if notify:
-            plexpy.NOTIFY_QUEUE.put({'notify_action': 'on_plexpyupdate',
-                                     'plexpy_download_info': release,
-                                     'plexpy_update_commit': plexpy.LATEST_VERSION,
-                                     'plexpy_update_behind': plexpy.COMMITS_BEHIND})
+            plexpy.NOTIFY_QUEUE.put({
+                'notify_action':
+                'on_plexpyupdate',
+                'plexpy_download_info':
+                release,
+                'plexpy_update_commit':
+                plexpy.LATEST_VERSION,
+                'plexpy_update_behind':
+                plexpy.COMMITS_BEHIND
+            })
 
         if auto_update:
             logger.info('Running automatic update.')
@@ -243,7 +292,8 @@ def update():
         logger.info('Windows .exe updating not supported yet.')
 
     elif plexpy.INSTALL_TYPE == 'git':
-        output, err = runGit('pull ' + plexpy.CONFIG.GIT_REMOTE + ' ' + plexpy.CONFIG.GIT_BRANCH)
+        output, err = runGit('pull ' + plexpy.CONFIG.GIT_REMOTE + ' ' +
+                             plexpy.CONFIG.GIT_BRANCH)
 
         if not output:
             logger.error('Unable to download latest version')
@@ -259,7 +309,9 @@ def update():
                 logger.info('Output: ' + str(output))
 
     else:
-        tar_download_url = 'https://github.com/{}/{}/tarball/{}'.format(plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO, plexpy.CONFIG.GIT_BRANCH)
+        tar_download_url = 'https://github.com/{}/{}/tarball/{}'.format(
+            plexpy.CONFIG.GIT_USER, plexpy.CONFIG.GIT_REPO,
+            plexpy.CONFIG.GIT_BRANCH)
         update_dir = os.path.join(plexpy.PROG_DIR, 'update')
         version_path = os.path.join(plexpy.PROG_DIR, 'version.txt')
 
@@ -267,7 +319,9 @@ def update():
         data = request.request_content(tar_download_url)
 
         if not data:
-            logger.error("Unable to retrieve new version from '%s', can't update", tar_download_url)
+            logger.error(
+                "Unable to retrieve new version from '%s', can't update",
+                tar_download_url)
             return
 
         download_name = plexpy.CONFIG.GIT_BRANCH + '-github'
@@ -288,9 +342,13 @@ def update():
         os.remove(tar_download_path)
 
         # Find update dir name
-        update_dir_contents = [x for x in os.listdir(update_dir) if os.path.isdir(os.path.join(update_dir, x))]
+        update_dir_contents = [
+            x for x in os.listdir(update_dir)
+            if os.path.isdir(os.path.join(update_dir, x))
+        ]
         if len(update_dir_contents) != 1:
-            logger.error("Invalid update data, update failed: " + str(update_dir_contents))
+            logger.error("Invalid update data, update failed: " +
+                         str(update_dir_contents))
             return
         content_dir = os.path.join(update_dir, update_dir_contents[0])
 
@@ -312,8 +370,7 @@ def update():
         except IOError as e:
             logger.error(
                 "Unable to write current version to version.txt, update not complete: %s",
-                e
-            )
+                e)
             return
 
 
@@ -331,7 +388,9 @@ def checkout_git_branch():
                 logger.error('Unable to checkout from git: ' + line)
                 logger.info('Output: ' + str(output))
 
-        output, err = runGit('pull %s %s' % (plexpy.CONFIG.GIT_REMOTE, plexpy.CONFIG.GIT_BRANCH))
+        output, err = runGit(
+            'pull %s %s' %
+            (plexpy.CONFIG.GIT_REMOTE, plexpy.CONFIG.GIT_BRANCH))
 
 
 def read_changelog(latest_only=False, since_prev_release=False):
@@ -366,19 +425,25 @@ def read_changelog(latest_only=False, since_prev_release=False):
                     elif latest_only:
                         latest_version_found = True
                     # Add a space to the end of the release to match tags
-                    elif since_prev_release and str(plexpy.PREV_RELEASE) + ' ' in header_text:
+                    elif since_prev_release and str(
+                            plexpy.PREV_RELEASE) + ' ' in header_text:
                         break
 
-                    output[-1] += '<h' + header_level + '>' + header_text + '</h' + header_level + '>'
+                    output[
+                        -1] += '<h' + header_level + '>' + header_text + '</h' + header_level + '>'
 
                 elif line_list_match:
                     line_level = len(line_list_match.group(1)) / 2
                     line_text = line_list_match.group(2)
 
                     if line_level > prev_level:
-                        output[-1] += '<ul>' * (line_level - prev_level) + '<li>' + line_text + '</li>'
+                        output[-1] += '<ul>' * (
+                            line_level -
+                            prev_level) + '<li>' + line_text + '</li>'
                     elif line_level < prev_level:
-                        output[-1] += '</ul>' * (prev_level - line_level) + '<li>' + line_text + '</li>'
+                        output[-1] += '</ul>' * (
+                            prev_level -
+                            line_level) + '<li>' + line_text + '</li>'
                     else:
                         output[-1] += '<li>' + line_text + '</li>'
 
@@ -395,5 +460,7 @@ def read_changelog(latest_only=False, since_prev_release=False):
         return ''.join(output)
 
     except IOError as e:
-        logger.error('Tautulli Version Checker :: Unable to open changelog file. %s' % e)
+        logger.error(
+            'Tautulli Version Checker :: Unable to open changelog file. %s' %
+            e)
         return '<h4>Unable to open changelog file</h4>'

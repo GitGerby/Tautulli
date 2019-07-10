@@ -31,12 +31,14 @@ def extract_plexwatch_xml(xml=None):
     try:
         xml_parse = minidom.parseString(clean_xml)
     except:
-        logger.warn(u"Tautulli Importer :: Error parsing XML for PlexWatch database.")
+        logger.warn(
+            u"Tautulli Importer :: Error parsing XML for PlexWatch database.")
         return None
 
     xml_head = xml_parse.getElementsByTagName('opt')
     if not xml_head:
-        logger.warn(u"Tautulli Importer :: Error parsing XML for PlexWatch database.")
+        logger.warn(
+            u"Tautulli Importer :: Error parsing XML for PlexWatch database.")
         return None
 
     for a in xml_head:
@@ -49,7 +51,8 @@ def extract_plexwatch_xml(xml=None):
         guid = helpers.get_xml_attr(a, 'guid')
         section_id = helpers.get_xml_attr(a, 'librarySectionID')
         media_index = helpers.get_xml_attr(a, 'index')
-        originally_available_at = helpers.get_xml_attr(a, 'originallyAvailableAt')
+        originally_available_at = helpers.get_xml_attr(
+            a, 'originallyAvailableAt')
         last_viewed_at = helpers.get_xml_attr(a, 'lastViewedAt')
         parent_media_index = helpers.get_xml_attr(a, 'parentIndex')
         parent_thumb = helpers.get_xml_attr(a, 'parentThumb')
@@ -120,7 +123,8 @@ def extract_plexwatch_xml(xml=None):
         if a.getElementsByTagName('TranscodeSession'):
             transcode_elem = a.getElementsByTagName('TranscodeSession')
             for e in transcode_elem:
-                transcode_audio_channels = helpers.get_xml_attr(e, 'audioChannels')
+                transcode_audio_channels = helpers.get_xml_attr(
+                    e, 'audioChannels')
                 transcode_audio_codec = helpers.get_xml_attr(e, 'audioCodec')
                 audio_decision = helpers.get_xml_attr(e, 'audioDecision')
                 transcode_container = helpers.get_xml_attr(e, 'container')
@@ -169,62 +173,64 @@ def extract_plexwatch_xml(xml=None):
             for i in label_elem:
                 labels.append(helpers.get_xml_attr(i, 'tag'))
 
-        output = {'added_at': added_at,
-                  'art': art,
-                  'duration': duration,
-                  'grandparent_thumb': grandparent_thumb,
-                  'title': title,
-                  'parent_title': parent_title,
-                  'grandparent_title': grandparent_title,
-                  'original_title': original_title,
-                  'tagline': tagline,
-                  'guid': guid,
-                  'section_id': section_id,
-                  'media_index': media_index,
-                  'originally_available_at': originally_available_at,
-                  'last_viewed_at': last_viewed_at,
-                  'parent_media_index': parent_media_index,
-                  'parent_thumb': parent_thumb,
-                  'rating': rating,
-                  'thumb': thumb,
-                  'media_type': media_type,
-                  'updated_at': updated_at,
-                  'view_offset': view_offset,
-                  'year': year,
-                  'directors': directors,
-                  'aspect_ratio': aspect_ratio,
-                  'audio_channels': audio_channels,
-                  'audio_codec': audio_codec,
-                  'bitrate': bitrate,
-                  'container': container,
-                  'height': height,
-                  'video_codec': video_codec,
-                  'video_framerate': video_framerate,
-                  'video_resolution': video_resolution,
-                  'width': width,
-                  'ip_address': ip_address,
-                  'machine_id': machine_id,
-                  'platform': platform,
-                  'player': player,
-                  'transcode_audio_channels': transcode_audio_channels,
-                  'transcode_audio_codec': transcode_audio_codec,
-                  'audio_decision': audio_decision,
-                  'transcode_container': transcode_container,
-                  'transcode_height': transcode_height,
-                  'transcode_protocol': transcode_protocol,
-                  'transcode_video_codec': transcode_video_codec,
-                  'video_decision': video_decision,
-                  'transcode_width': transcode_width,
-                  'transcode_decision': transcode_decision,
-                  'user_id': user_id,
-                  'writers': writers,
-                  'actors': actors,
-                  'genres': genres,
-                  'studio': studio,
-                  'labels': labels
-                  }
+        output = {
+            'added_at': added_at,
+            'art': art,
+            'duration': duration,
+            'grandparent_thumb': grandparent_thumb,
+            'title': title,
+            'parent_title': parent_title,
+            'grandparent_title': grandparent_title,
+            'original_title': original_title,
+            'tagline': tagline,
+            'guid': guid,
+            'section_id': section_id,
+            'media_index': media_index,
+            'originally_available_at': originally_available_at,
+            'last_viewed_at': last_viewed_at,
+            'parent_media_index': parent_media_index,
+            'parent_thumb': parent_thumb,
+            'rating': rating,
+            'thumb': thumb,
+            'media_type': media_type,
+            'updated_at': updated_at,
+            'view_offset': view_offset,
+            'year': year,
+            'directors': directors,
+            'aspect_ratio': aspect_ratio,
+            'audio_channels': audio_channels,
+            'audio_codec': audio_codec,
+            'bitrate': bitrate,
+            'container': container,
+            'height': height,
+            'video_codec': video_codec,
+            'video_framerate': video_framerate,
+            'video_resolution': video_resolution,
+            'width': width,
+            'ip_address': ip_address,
+            'machine_id': machine_id,
+            'platform': platform,
+            'player': player,
+            'transcode_audio_channels': transcode_audio_channels,
+            'transcode_audio_codec': transcode_audio_codec,
+            'audio_decision': audio_decision,
+            'transcode_container': transcode_container,
+            'transcode_height': transcode_height,
+            'transcode_protocol': transcode_protocol,
+            'transcode_video_codec': transcode_video_codec,
+            'video_decision': video_decision,
+            'transcode_width': transcode_width,
+            'transcode_decision': transcode_decision,
+            'user_id': user_id,
+            'writers': writers,
+            'actors': actors,
+            'genres': genres,
+            'studio': studio,
+            'labels': labels
+        }
 
     return output
+
 
 def validate_database(database=None, table_name=None):
     try:
@@ -251,7 +257,10 @@ def validate_database(database=None, table_name=None):
 
     return 'success'
 
-def import_from_plexwatch(database=None, table_name=None, import_ignore_interval=0):
+
+def import_from_plexwatch(database=None,
+                          table_name=None,
+                          import_ignore_interval=0):
 
     try:
         connection = sqlite3.connect(database, timeout=20)
@@ -266,7 +275,9 @@ def import_from_plexwatch(database=None, table_name=None, import_ignore_interval
     try:
         connection.execute('SELECT ratingKey from %s' % table_name)
     except sqlite3.OperationalError:
-        logger.error(u"Tautulli Importer :: Database specified does not contain the required fields.")
+        logger.error(
+            u"Tautulli Importer :: Database specified does not contain the required fields."
+        )
         return None
 
     logger.debug(u"Tautulli Importer :: PlexWatch data import in progress...")
@@ -278,7 +289,9 @@ def import_from_plexwatch(database=None, table_name=None, import_ignore_interval
     try:
         users.refresh_users()
     except:
-        logger.debug(u"Tautulli Importer :: Unable to refresh the users list. Aborting import.")
+        logger.debug(
+            u"Tautulli Importer :: Unable to refresh the users list. Aborting import."
+        )
         return None
 
     query = 'SELECT time AS started, ' \
@@ -313,13 +326,15 @@ def import_from_plexwatch(database=None, table_name=None, import_ignore_interval
 
         # If we get back None from our xml extractor skip over the record and log error.
         if not extracted_xml:
-            logger.error(u"Tautulli Importer :: Skipping record with ratingKey %s due to malformed xml."
-                         % str(row['rating_key']))
+            logger.error(
+                u"Tautulli Importer :: Skipping record with ratingKey %s due to malformed xml."
+                % str(row['rating_key']))
             continue
 
         # Skip line if we don't have a ratingKey to work with
         if not row['rating_key']:
-            logger.error(u"Tautulli Importer :: Skipping record due to null ratingKey.")
+            logger.error(
+                u"Tautulli Importer :: Skipping record due to null ratingKey.")
             continue
 
         # If the user_id no longer exists in the friends list, pull it from the xml.
@@ -328,105 +343,152 @@ def import_from_plexwatch(database=None, table_name=None, import_ignore_interval
         else:
             user_id = extracted_xml['user_id']
 
-        session_history = {'started': row['started'],
-                           'stopped': row['stopped'],
-                           'rating_key': row['rating_key'],
-                           'title': row['title'],
-                           'parent_title': extracted_xml['parent_title'],
-                           'grandparent_title': row['grandparent_title'],
-                           'original_title': extracted_xml['original_title'],
-                           'full_title': row['full_title'],
-                           'user_id': user_id,
-                           'user': row['user'],
-                           'ip_address': row['ip_address'] if row['ip_address'] else extracted_xml['ip_address'],
-                           'paused_counter': row['paused_counter'],
-                           'player': row['player'],
-                           'platform': extracted_xml['platform'],
-                           'machine_id': extracted_xml['machine_id'],
-                           'parent_rating_key': row['parent_rating_key'],
-                           'grandparent_rating_key': row['grandparent_rating_key'],
-                           'media_type': extracted_xml['media_type'],
-                           'view_offset': extracted_xml['view_offset'],
-                           'video_decision': extracted_xml['video_decision'],
-                           'audio_decision': extracted_xml['audio_decision'],
-                           'transcode_decision': extracted_xml['transcode_decision'],
-                           'duration': extracted_xml['duration'],
-                           'width': extracted_xml['width'],
-                           'height': extracted_xml['height'],
-                           'container': extracted_xml['container'],
-                           'video_codec': extracted_xml['video_codec'],
-                           'audio_codec': extracted_xml['audio_codec'],
-                           'bitrate': extracted_xml['bitrate'],
-                           'video_resolution': extracted_xml['video_resolution'],
-                           'video_framerate': extracted_xml['video_framerate'],
-                           'aspect_ratio': extracted_xml['aspect_ratio'],
-                           'audio_channels': extracted_xml['audio_channels'],
-                           'transcode_protocol': extracted_xml['transcode_protocol'],
-                           'transcode_container': extracted_xml['transcode_container'],
-                           'transcode_video_codec': extracted_xml['transcode_video_codec'],
-                           'transcode_audio_codec': extracted_xml['transcode_audio_codec'],
-                           'transcode_audio_channels': extracted_xml['transcode_audio_channels'],
-                           'transcode_width': extracted_xml['transcode_width'],
-                           'transcode_height': extracted_xml['transcode_height']
-                           }
+        session_history = {
+            'started':
+            row['started'],
+            'stopped':
+            row['stopped'],
+            'rating_key':
+            row['rating_key'],
+            'title':
+            row['title'],
+            'parent_title':
+            extracted_xml['parent_title'],
+            'grandparent_title':
+            row['grandparent_title'],
+            'original_title':
+            extracted_xml['original_title'],
+            'full_title':
+            row['full_title'],
+            'user_id':
+            user_id,
+            'user':
+            row['user'],
+            'ip_address':
+            row['ip_address']
+            if row['ip_address'] else extracted_xml['ip_address'],
+            'paused_counter':
+            row['paused_counter'],
+            'player':
+            row['player'],
+            'platform':
+            extracted_xml['platform'],
+            'machine_id':
+            extracted_xml['machine_id'],
+            'parent_rating_key':
+            row['parent_rating_key'],
+            'grandparent_rating_key':
+            row['grandparent_rating_key'],
+            'media_type':
+            extracted_xml['media_type'],
+            'view_offset':
+            extracted_xml['view_offset'],
+            'video_decision':
+            extracted_xml['video_decision'],
+            'audio_decision':
+            extracted_xml['audio_decision'],
+            'transcode_decision':
+            extracted_xml['transcode_decision'],
+            'duration':
+            extracted_xml['duration'],
+            'width':
+            extracted_xml['width'],
+            'height':
+            extracted_xml['height'],
+            'container':
+            extracted_xml['container'],
+            'video_codec':
+            extracted_xml['video_codec'],
+            'audio_codec':
+            extracted_xml['audio_codec'],
+            'bitrate':
+            extracted_xml['bitrate'],
+            'video_resolution':
+            extracted_xml['video_resolution'],
+            'video_framerate':
+            extracted_xml['video_framerate'],
+            'aspect_ratio':
+            extracted_xml['aspect_ratio'],
+            'audio_channels':
+            extracted_xml['audio_channels'],
+            'transcode_protocol':
+            extracted_xml['transcode_protocol'],
+            'transcode_container':
+            extracted_xml['transcode_container'],
+            'transcode_video_codec':
+            extracted_xml['transcode_video_codec'],
+            'transcode_audio_codec':
+            extracted_xml['transcode_audio_codec'],
+            'transcode_audio_channels':
+            extracted_xml['transcode_audio_channels'],
+            'transcode_width':
+            extracted_xml['transcode_width'],
+            'transcode_height':
+            extracted_xml['transcode_height']
+        }
 
-        session_history_metadata = {'rating_key': helpers.latinToAscii(row['rating_key']),
-                                    'parent_rating_key': row['parent_rating_key'],
-                                    'grandparent_rating_key': row['grandparent_rating_key'],
-                                    'title': row['title'],
-                                    'parent_title': extracted_xml['parent_title'],
-                                    'grandparent_title': row['grandparent_title'],
-                                    'original_title': extracted_xml['original_title'],
-                                    'media_index': extracted_xml['media_index'],
-                                    'parent_media_index': extracted_xml['parent_media_index'],
-                                    'thumb': extracted_xml['thumb'],
-                                    'parent_thumb': extracted_xml['parent_thumb'],
-                                    'grandparent_thumb': extracted_xml['grandparent_thumb'],
-                                    'art': extracted_xml['art'],
-                                    'media_type': extracted_xml['media_type'],
-                                    'year': extracted_xml['year'],
-                                    'originally_available_at': extracted_xml['originally_available_at'],
-                                    'added_at': extracted_xml['added_at'],
-                                    'updated_at': extracted_xml['updated_at'],
-                                    'last_viewed_at': extracted_xml['last_viewed_at'],
-                                    'content_rating': row['content_rating'],
-                                    'summary': row['summary'],
-                                    'tagline': extracted_xml['tagline'],
-                                    'rating': extracted_xml['rating'],
-                                    'duration': extracted_xml['duration'],
-                                    'guid': extracted_xml['guid'],
-                                    'section_id': extracted_xml['section_id'],
-                                    'directors': extracted_xml['directors'],
-                                    'writers': extracted_xml['writers'],
-                                    'actors': extracted_xml['actors'],
-                                    'genres': extracted_xml['genres'],
-                                    'studio': extracted_xml['studio'],
-                                    'labels': extracted_xml['labels'],
-                                    'full_title': row['full_title'],
-                                    'width': extracted_xml['width'],
-                                    'height': extracted_xml['height'],
-                                    'container': extracted_xml['container'],
-                                    'video_codec': extracted_xml['video_codec'],
-                                    'audio_codec': extracted_xml['audio_codec'],
-                                    'bitrate': extracted_xml['bitrate'],
-                                    'video_resolution': extracted_xml['video_resolution'],
-                                    'video_framerate': extracted_xml['video_framerate'],
-                                    'aspect_ratio': extracted_xml['aspect_ratio'],
-                                    'audio_channels': extracted_xml['audio_channels']
-                                    }
+        session_history_metadata = {
+            'rating_key': helpers.latinToAscii(row['rating_key']),
+            'parent_rating_key': row['parent_rating_key'],
+            'grandparent_rating_key': row['grandparent_rating_key'],
+            'title': row['title'],
+            'parent_title': extracted_xml['parent_title'],
+            'grandparent_title': row['grandparent_title'],
+            'original_title': extracted_xml['original_title'],
+            'media_index': extracted_xml['media_index'],
+            'parent_media_index': extracted_xml['parent_media_index'],
+            'thumb': extracted_xml['thumb'],
+            'parent_thumb': extracted_xml['parent_thumb'],
+            'grandparent_thumb': extracted_xml['grandparent_thumb'],
+            'art': extracted_xml['art'],
+            'media_type': extracted_xml['media_type'],
+            'year': extracted_xml['year'],
+            'originally_available_at':
+            extracted_xml['originally_available_at'],
+            'added_at': extracted_xml['added_at'],
+            'updated_at': extracted_xml['updated_at'],
+            'last_viewed_at': extracted_xml['last_viewed_at'],
+            'content_rating': row['content_rating'],
+            'summary': row['summary'],
+            'tagline': extracted_xml['tagline'],
+            'rating': extracted_xml['rating'],
+            'duration': extracted_xml['duration'],
+            'guid': extracted_xml['guid'],
+            'section_id': extracted_xml['section_id'],
+            'directors': extracted_xml['directors'],
+            'writers': extracted_xml['writers'],
+            'actors': extracted_xml['actors'],
+            'genres': extracted_xml['genres'],
+            'studio': extracted_xml['studio'],
+            'labels': extracted_xml['labels'],
+            'full_title': row['full_title'],
+            'width': extracted_xml['width'],
+            'height': extracted_xml['height'],
+            'container': extracted_xml['container'],
+            'video_codec': extracted_xml['video_codec'],
+            'audio_codec': extracted_xml['audio_codec'],
+            'bitrate': extracted_xml['bitrate'],
+            'video_resolution': extracted_xml['video_resolution'],
+            'video_framerate': extracted_xml['video_framerate'],
+            'aspect_ratio': extracted_xml['aspect_ratio'],
+            'audio_channels': extracted_xml['audio_channels']
+        }
 
         # On older versions of PMS, "clip" items were still classified as "movie" and had bad ratingKey values
         # Just make sure that the ratingKey is indeed an integer
         if session_history_metadata['rating_key'].isdigit():
-            ap.write_session_history(session=session_history,
-                                     import_metadata=session_history_metadata,
-                                     is_import=True,
-                                     import_ignore_interval=import_ignore_interval)
+            ap.write_session_history(
+                session=session_history,
+                import_metadata=session_history_metadata,
+                is_import=True,
+                import_ignore_interval=import_ignore_interval)
         else:
-            logger.debug(u"Tautulli Importer :: Item has bad rating_key: %s" % session_history_metadata['rating_key'])
+            logger.debug(u"Tautulli Importer :: Item has bad rating_key: %s" %
+                         session_history_metadata['rating_key'])
 
     logger.debug(u"Tautulli Importer :: PlexWatch data import complete.")
     import_users()
+
 
 def import_users():
     logger.debug(u"Tautulli Importer :: Importing PlexWatch Users...")

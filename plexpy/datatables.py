@@ -48,10 +48,12 @@ class DataTables(object):
 
         # Fetch all our parameters
         if kwargs.get('json_data'):
-            parameters = helpers.process_json_kwargs(json_kwargs=kwargs.get('json_data'))
+            parameters = helpers.process_json_kwargs(
+                json_kwargs=kwargs.get('json_data'))
         else:
-            logger.error('Tautulli DataTables :: Parameters for Datatables must be sent as a serialised json object '
-                         'named json_data.')
+            logger.error(
+                'Tautulli DataTables :: Parameters for Datatables must be sent as a serialised json object '
+                'named json_data.')
             return None
 
         extracted_columns = self.extract_columns(columns=columns)
@@ -67,13 +69,13 @@ class DataTables(object):
 
         # Build union parameters
         if table_name_union:
-            extracted_columns_union = self.extract_columns(columns=columns_union)
+            extracted_columns_union = self.extract_columns(
+                columns=columns_union)
             group_u = self.build_grouping(group_by_union)
             c_where_u, cwu_args = self.build_custom_where(custom_where_union)
-            union = 'UNION SELECT %s FROM %s %s %s' % (extracted_columns_union['column_string'],
-                                                       table_name_union,
-                                                       c_where_u,
-                                                       group_u)
+            union = 'UNION SELECT %s FROM %s %s %s' % (
+                extracted_columns_union['column_string'], table_name_union,
+                c_where_u, group_u)
         else:
             union = ''
             cwu_args = []
@@ -90,21 +92,28 @@ class DataTables(object):
         filtered = self.ssp_db.select(query, args=args)
 
         # Remove NULL rows
-        filtered = [row for row in filtered if not all(v is None for v in row.values())]
+        filtered = [
+            row for row in filtered if not all(v is None for v in row.values())
+        ]
 
         # Build grand totals
-        totalcount = self.ssp_db.select('SELECT COUNT(id) as total_count from %s' % table_name)[0]['total_count']
+        totalcount = self.ssp_db.select(
+            'SELECT COUNT(id) as total_count from %s' %
+            table_name)[0]['total_count']
 
         # Get draw counter
         draw_counter = int(parameters['draw'])
 
         # Paginate results
-        result = filtered[parameters['start']:(parameters['start'] + parameters['length'])]
+        result = filtered[parameters['start']:(parameters['start'] +
+                                               parameters['length'])]
 
-        output = {'result': result,
-                  'draw': draw_counter,
-                  'filteredCount': len(filtered),
-                  'totalCount': totalcount}
+        output = {
+            'result': result,
+            'draw': draw_counter,
+            'filteredCount': len(filtered),
+            'totalCount': totalcount
+        }
 
         return output
 
@@ -125,9 +134,12 @@ class DataTables(object):
 
         for i, join_type in enumerate(join_types):
             if join_type.upper() == 'LEFT OUTER JOIN':
-                join += 'LEFT OUTER JOIN %s ON %s = %s ' % (join_tables[i], join_evals[i][0], join_evals[i][1])
-            elif join_type.upper() == 'JOIN' or join_type.upper() == 'INNER JOIN':
-                join += 'JOIN %s ON %s = %s ' % (join_tables[i], join_evals[i][0], join_evals[i][1])
+                join += 'LEFT OUTER JOIN %s ON %s = %s ' % (
+                    join_tables[i], join_evals[i][0], join_evals[i][1])
+            elif join_type.upper() == 'JOIN' or join_type.upper(
+            ) == 'INNER JOIN':
+                join += 'JOIN %s ON %s = %s ' % (
+                    join_tables[i], join_evals[i][0], join_evals[i][1])
 
         return join
 
@@ -170,9 +182,10 @@ class DataTables(object):
             if dt_columns[int(o['column'])]['data']:
                 # We have a name, now check if it's a valid column name for our query
                 # so we don't just inject a random value
-                if any(d.lower() == dt_columns[int(o['column'])]['data'].lower()
-                       for d in columns):
-                    order += dt_columns[int(o['column'])]['data'] + '%s, ' % sort_order
+                if any(d.lower() == dt_columns[int(o['column'])]
+                       ['data'].lower() for d in columns):
+                    order += dt_columns[int(
+                        o['column'])]['data'] + '%s, ' % sort_order
                 else:
                     # if we receive a bogus name, rather not sort at all.
                     pass
@@ -197,7 +210,8 @@ class DataTables(object):
                     if s['data']:
                         # We have a name, now check if it's a valid column name for our query
                         # so we don't just inject a random value
-                        if any(d.lower() == s['data'].lower() for d in columns):
+                        if any(d.lower() == s['data'].lower()
+                               for d in columns):
                             where += s['data'] + ' LIKE ? OR '
                             args.append('%' + search_param + '%')
                         else:
@@ -209,7 +223,7 @@ class DataTables(object):
                         args.append('%' + search_param + '%')
             if where:
                 where = 'WHERE ' + where.rstrip(' OR ')
-        
+
         return where, args
 
     # This method extracts column data from our column list
@@ -228,11 +242,13 @@ class DataTables(object):
             as_search = re.compile(' as ', re.IGNORECASE)
 
             if re.search(as_search, column):
-                column_named = re.split(as_search, column)[1].rpartition('.')[-1]
+                column_named = re.split(as_search,
+                                        column)[1].rpartition('.')[-1]
                 column_literal = re.split(as_search, column)[0]
                 column_order = re.split(as_search, column)[1]
                 if match_columns:
-                    if any(d['data'].lower() == column_named.lower() for d in match_columns):
+                    if any(d['data'].lower() == column_named.lower()
+                           for d in match_columns):
                         columns_string += column + ', '
                         columns_literal.append(column_literal)
                         columns_named.append(column_named)
@@ -245,7 +261,8 @@ class DataTables(object):
             else:
                 column_named = column.rpartition('.')[-1]
                 if match_columns:
-                    if any(d['data'].lower() == column_named.lower() for d in match_columns):
+                    if any(d['data'].lower() == column_named.lower()
+                           for d in match_columns):
                         columns_string += column + ', '
                         columns_literal.append(column)
                         columns_named.append(column_named)
@@ -264,10 +281,11 @@ class DataTables(object):
         # column_named is the text after the "as", if we have an "as". Any table prefix is also stripped off.
         #   We use this to match with columns received from the Datatables request.
         # column_order is the text after the "as", if we have an "as". Any table prefix is left intact.
-        column_data = {'column_string': columns_string,
-                       'column_literal': columns_literal,
-                       'column_named': columns_named,
-                       'column_order': columns_order
-                       }
+        column_data = {
+            'column_string': columns_string,
+            'column_literal': columns_literal,
+            'column_named': columns_named,
+            'column_order': columns_order
+        }
 
         return column_data

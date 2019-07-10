@@ -15,18 +15,21 @@
 
 import os
 
-import plexpy
 import helpers
 import logger
+import plexpy
+
 
 def get_log_tail(window=20, parsed=True, log_type="server"):
 
     if plexpy.CONFIG.PMS_LOGS_FOLDER:
         log_file = ""
         if log_type == "server":
-            log_file = os.path.join(plexpy.CONFIG.PMS_LOGS_FOLDER, 'Plex Media Server.log')
+            log_file = os.path.join(plexpy.CONFIG.PMS_LOGS_FOLDER,
+                                    'Plex Media Server.log')
         elif log_type == "scanner":
-            log_file = os.path.join(plexpy.CONFIG.PMS_LOGS_FOLDER, 'Plex Media Scanner.log')
+            log_file = os.path.join(plexpy.CONFIG.PMS_LOGS_FOLDER,
+                                    'Plex Media Scanner.log')
     else:
         return []
 
@@ -45,7 +48,8 @@ def get_log_tail(window=20, parsed=True, log_type="server"):
             try:
                 log_time = i.split(' [')[0]
                 log_level = i.split('] ', 1)[1].split(' - ', 1)[0]
-                log_msg = unicode(i.split('] ', 1)[1].split(' - ', 1)[1], 'utf-8')
+                log_msg = unicode(
+                    i.split('] ', 1)[1].split(' - ', 1)[1], 'utf-8')
                 full_line = [log_time, log_level, log_msg]
                 clean_lines.append(full_line)
             except:
@@ -54,7 +58,9 @@ def get_log_tail(window=20, parsed=True, log_type="server"):
                 clean_lines.append(full_line)
 
         if line_error:
-            logger.error('Tautulli was unable to parse some lines of the Plex Media Server log.')
+            logger.error(
+                'Tautulli was unable to parse some lines of the Plex Media Server log.'
+            )
 
         return clean_lines
     else:
@@ -65,6 +71,7 @@ def get_log_tail(window=20, parsed=True, log_type="server"):
         return raw_lines
 
     return log_lines
+
 
 # http://stackoverflow.com/a/13790289/2405162
 def tail(f, lines=1, _buffer=4098):

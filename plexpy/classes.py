@@ -17,7 +17,6 @@
 ## Stolen from Sick-Beard's classes.py ##
 #########################################
 
-
 import urllib
 
 from common import USER_AGENT

@@ -21,11 +21,10 @@ from multiprocessing.dummy import Pool as ThreadPool
 from urlparse import urljoin
 
 import certifi
-import urllib3
-
-import plexpy
 import helpers
 import logger
+import plexpy
+import urllib3
 
 
 class HTTPHandler(object):
@@ -33,7 +32,13 @@ class HTTPHandler(object):
     Retrieve data from Plex Server
     """
 
-    def __init__(self, urls, headers=None, token=None, timeout=10, ssl_verify=True, silent=False):
+    def __init__(self,
+                 urls,
+                 headers=None,
+                 token=None,
+                 timeout=10,
+                 ssl_verify=True,
+                 silent=False):
         self._silent = silent
 
         if isinstance(urls, basestring):
@@ -44,15 +49,23 @@ class HTTPHandler(object):
         if headers:
             self.headers = headers
         else:
-            self.headers = {'X-Plex-Product': plexpy.common.PRODUCT,
-                            'X-Plex-Version': plexpy.common.RELEASE,
-                            'X-Plex-Client-Identifier': plexpy.CONFIG.PMS_UUID,
-                            'X-Plex-Platform': plexpy.common.PLATFORM,
-                            'X-Plex-Platform-Version': plexpy.common.PLATFORM_RELEASE,
-                            'X-Plex-Device': '{} {}'.format(plexpy.common.PLATFORM,
-                                                            plexpy.common.PLATFORM_RELEASE),
-                            'X-Plex-Device-Name': plexpy.common.PLATFORM_DEVICE_NAME
-                            }
+            self.headers = {
+                'X-Plex-Product':
+                plexpy.common.PRODUCT,
+                'X-Plex-Version':
+                plexpy.common.RELEASE,
+                'X-Plex-Client-Identifier':
+                plexpy.CONFIG.PMS_UUID,
+                'X-Plex-Platform':
+                plexpy.common.PLATFORM,
+                'X-Plex-Platform-Version':
+                plexpy.common.PLATFORM_RELEASE,
+                'X-Plex-Device':
+                '{} {}'.format(plexpy.common.PLATFORM,
+                               plexpy.common.PLATFORM_RELEASE),
+                'X-Plex-Device-Name':
+                plexpy.common.PLATFORM_DEVICE_NAME
+            }
 
         self.token = token
         if self.token:
@@ -86,7 +99,8 @@ class HTTPHandler(object):
         self.timeout = timeout or self.timeout
 
         if self.request_type not in self.valid_request_types:
-            logger.debug(u"HTTP request made but unsupported request type given.")
+            logger.debug(
+                u"HTTP request made but unsupported request type given.")
             return None
 
         if uri:
@@ -118,7 +132,8 @@ class HTTPHandler(object):
                 chunk = 0
 
         if self.ssl_verify:
-            session = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+            session = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                                          ca_certs=certifi.where())
         else:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             session = urllib3.PoolManager()
@@ -142,18 +157,26 @@ class HTTPHandler(object):
     def _http_requests_urllib3(self, url, session):
         """Request the data from the url"""
         try:
-            r = session.request(self.request_type, url, headers=self.headers, timeout=self.timeout)
+            r = session.request(self.request_type,
+                                url,
+                                headers=self.headers,
+                                timeout=self.timeout)
         except IOError as e:
             if not self._silent:
-                logger.warn(u"Failed to access uri endpoint %s with error %s" % (self.uri, e))
+                logger.warn(u"Failed to access uri endpoint %s with error %s" %
+                            (self.uri, e))
             return None
         except Exception as e:
             if not self._silent:
-                logger.warn(u"Failed to access uri endpoint %s. Is your server maybe accepting SSL connections only? %s" % (self.uri, e))
+                logger.warn(
+                    u"Failed to access uri endpoint %s. Is your server maybe accepting SSL connections only? %s"
+                    % (self.uri, e))
             return None
         except:
             if not self._silent:
-                logger.warn(u"Failed to access uri endpoint %s with Uncaught exception." % self.uri)
+                logger.warn(
+                    u"Failed to access uri endpoint %s with Uncaught exception."
+                    % self.uri)
             return None
 
         response_status = r.status
@@ -164,7 +187,9 @@ class HTTPHandler(object):
             return self._http_format_output(response_content, response_headers)
         else:
             if not self._silent:
-                logger.warn(u"Failed to access uri endpoint %s. Status code %r" % (self.uri, response_status))
+                logger.warn(
+                    u"Failed to access uri endpoint %s. Status code %r" %
+                    (self.uri, response_status))
             return None
 
     def _http_format_output(self, response_content, response_headers):
@@ -191,5 +216,7 @@ class HTTPHandler(object):
 
         except Exception as e:
             if not self._silent:
-                logger.warn(u"Failed format response from uri %s to %s error %s" % (self.uri, self.output_format, e))
+                logger.warn(
+                    u"Failed format response from uri %s to %s error %s" %
+                    (self.uri, self.output_format, e))
             return None

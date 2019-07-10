@@ -20,7 +20,6 @@ import database
 import helpers
 import logger
 
-
 TEMP_DEVICE_TOKEN = None
 
 
@@ -51,26 +50,36 @@ def get_mobile_device_by_token(device_token=None):
     return get_mobile_devices(device_token=device_token)
 
 
-def add_mobile_device(device_id=None, device_name=None, device_token=None, friendly_name=None):
+def add_mobile_device(device_id=None,
+                      device_name=None,
+                      device_token=None,
+                      friendly_name=None):
     db = database.MonitorDatabase()
 
     keys = {'device_id': device_id}
-    values = {'device_name': device_name,
-              'device_token': device_token}
+    values = {'device_name': device_name, 'device_token': device_token}
 
     if friendly_name:
         values['friendly_name'] = friendly_name
 
     try:
-        result = db.upsert(table_name='mobile_devices', key_dict=keys, value_dict=values)
+        result = db.upsert(table_name='mobile_devices',
+                           key_dict=keys,
+                           value_dict=values)
     except Exception as e:
-        logger.warn(u"Tautulli MobileApp :: Failed to register mobile device in the database: %s." % e)
+        logger.warn(
+            u"Tautulli MobileApp :: Failed to register mobile device in the database: %s."
+            % e)
         return
 
     if result == 'insert':
-        logger.info(u"Tautulli MobileApp :: Registered mobile device '%s' in the database." % device_name)
+        logger.info(
+            u"Tautulli MobileApp :: Registered mobile device '%s' in the database."
+            % device_name)
     else:
-        logger.debug(u"Tautulli MobileApp :: Re-registered mobile device '%s' in the database." % device_name)
+        logger.debug(
+            u"Tautulli MobileApp :: Re-registered mobile device '%s' in the database."
+            % device_name)
 
     return True
 
@@ -79,7 +88,9 @@ def get_mobile_device_config(mobile_device_id=None):
     if str(mobile_device_id).isdigit():
         mobile_device_id = int(mobile_device_id)
     else:
-        logger.error(u"Tautulli MobileApp :: Unable to retrieve mobile device config: invalid mobile_device_id %s." % mobile_device_id)
+        logger.error(
+            u"Tautulli MobileApp :: Unable to retrieve mobile device config: invalid mobile_device_id %s."
+            % mobile_device_id)
         return None
 
     db = database.MonitorDatabase()
@@ -93,7 +104,9 @@ def set_mobile_device_config(mobile_device_id=None, **kwargs):
     if str(mobile_device_id).isdigit():
         mobile_device_id = int(mobile_device_id)
     else:
-        logger.error(u"Tautulli MobileApp :: Unable to set exisiting mobile device: invalid mobile_device_id %s." % mobile_device_id)
+        logger.error(
+            u"Tautulli MobileApp :: Unable to set exisiting mobile device: invalid mobile_device_id %s."
+            % mobile_device_id)
         return False
 
     keys = {'id': mobile_device_id}
@@ -104,11 +117,16 @@ def set_mobile_device_config(mobile_device_id=None, **kwargs):
 
     db = database.MonitorDatabase()
     try:
-        db.upsert(table_name='mobile_devices', key_dict=keys, value_dict=values)
-        logger.info(u"Tautulli MobileApp :: Updated mobile device agent: mobile_device_id %s." % mobile_device_id)
+        db.upsert(table_name='mobile_devices',
+                  key_dict=keys,
+                  value_dict=values)
+        logger.info(
+            u"Tautulli MobileApp :: Updated mobile device agent: mobile_device_id %s."
+            % mobile_device_id)
         return True
     except Exception as e:
-        logger.warn(u"Tautulli MobileApp :: Unable to update mobile device: %s." % e)
+        logger.warn(
+            u"Tautulli MobileApp :: Unable to update mobile device: %s." % e)
         return False
 
 
@@ -116,8 +134,11 @@ def delete_mobile_device(mobile_device_id=None):
     db = database.MonitorDatabase()
 
     if mobile_device_id:
-        logger.debug(u"Tautulli MobileApp :: Deleting device_id %s from the database." % mobile_device_id)
-        result = db.action('DELETE FROM mobile_devices WHERE id = ?', args=[mobile_device_id])
+        logger.debug(
+            u"Tautulli MobileApp :: Deleting device_id %s from the database." %
+            mobile_device_id)
+        result = db.action('DELETE FROM mobile_devices WHERE id = ?',
+                           args=[mobile_device_id])
         return True
     else:
         return False
@@ -129,10 +150,13 @@ def set_last_seen(device_token=None):
     last_seen = int(time.time())
 
     try:
-        result = db.action('UPDATE mobile_devices SET last_seen = ? WHERE device_token = ?',
-                           args=[last_seen, device_token])
+        result = db.action(
+            'UPDATE mobile_devices SET last_seen = ? WHERE device_token = ?',
+            args=[last_seen, device_token])
     except Exception as e:
-        logger.warn(u"Tautulli MobileApp :: Failed to set last_seen time for device: %s." % e)
+        logger.warn(
+            u"Tautulli MobileApp :: Failed to set last_seen time for device: %s."
+            % e)
         return
 
 

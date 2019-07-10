@@ -16,7 +16,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Tautulli.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import hashlib
 import inspect
 import json
@@ -27,20 +26,19 @@ import time
 import traceback
 
 import cherrypy
-import xmltodict
-
-import plexpy
 import config
 import database
 import helpers
 import libraries
 import logger
 import mobile_app
-import notification_handler
-import notifiers
 import newsletter_handler
 import newsletters
+import notification_handler
+import notifiers
+import plexpy
 import users
+import xmltodict
 
 
 class API2:
@@ -66,9 +64,13 @@ class API2:
         for f, _ in inspect.getmembers(self, predicate=inspect.ismethod):
             if not f.startswith('_') and not f.startswith('_api'):
                 if md is True:
-                    docs[f] = inspect.getdoc(getattr(self, f)) if inspect.getdoc(getattr(self, f)) else None
+                    docs[f] = inspect.getdoc(getattr(
+                        self, f)) if inspect.getdoc(getattr(self, f)) else None
                 else:
-                    docs[f] = ' '.join(inspect.getdoc(getattr(self, f)).split()) if inspect.getdoc(getattr(self, f)) else None
+                    docs[f] = ' '.join(
+                        inspect.getdoc(getattr(self,
+                                               f)).split()) if inspect.getdoc(
+                                                   getattr(self, f)) else None
         return docs
 
     def docs_md(self):
@@ -101,11 +103,15 @@ class API2:
             self._api_response_code = 401
 
         elif 'cmd' not in kwargs:
-            self._api_msg = 'Parameter cmd is required. Possible commands are: %s' % ', '.join(self._api_valid_methods)
+            self._api_msg = 'Parameter cmd is required. Possible commands are: %s' % ', '.join(
+                self._api_valid_methods)
             self._api_response_code = 400
 
-        elif 'cmd' in kwargs and kwargs.get('cmd') not in self._api_valid_methods:
-            self._api_msg = 'Unknown command: %s. Possible commands are: %s' % (kwargs.get('cmd', ''), ', '.join(sorted(self._api_valid_methods)))
+        elif 'cmd' in kwargs and kwargs.get(
+                'cmd') not in self._api_valid_methods:
+            self._api_msg = 'Unknown command: %s. Possible commands are: %s' % (
+                kwargs.get('cmd', ''), ', '.join(
+                    sorted(self._api_valid_methods)))
             self._api_response_code = 400
 
         self._api_callback = kwargs.pop('callback', None)
@@ -119,11 +125,15 @@ class API2:
         if 'app' in kwargs and kwargs.pop('app') == 'true':
             self._api_app = True
 
-        if plexpy.CONFIG.API_ENABLED and not self._api_msg or self._api_cmd in ('get_apikey', 'docs', 'docs_md'):
-            if self._api_apikey == plexpy.CONFIG.API_KEY or (self._api_app and self._api_apikey == mobile_app.TEMP_DEVICE_TOKEN):
+        if plexpy.CONFIG.API_ENABLED and not self._api_msg or self._api_cmd in (
+                'get_apikey', 'docs', 'docs_md'):
+            if self._api_apikey == plexpy.CONFIG.API_KEY or (
+                    self._api_app
+                    and self._api_apikey == mobile_app.TEMP_DEVICE_TOKEN):
                 self._api_authenticated = True
 
-            elif self._api_app and mobile_app.get_mobile_device_by_token(self._api_apikey):
+            elif self._api_app and mobile_app.get_mobile_device_by_token(
+                    self._api_apikey):
                 mobile_app.set_last_seen(self._api_apikey)
                 self._api_authenticated = True
 
@@ -135,7 +145,8 @@ class API2:
                 self._api_msg = None
                 self._api_kwargs = kwargs
 
-            elif not self._api_authenticated and self._api_cmd in ('get_apikey', 'docs', 'docs_md'):
+            elif not self._api_authenticated and self._api_cmd in (
+                    'get_apikey', 'docs', 'docs_md'):
                 self._api_authenticated = True
                 # Remove the old error msg
                 self._api_msg = None
@@ -144,11 +155,19 @@ class API2:
         if self._api_msg:
             logger.api_debug(u'Tautulli APIv2 :: %s.' % self._api_msg)
 
-        logger.api_debug(u'Tautulli APIv2 :: Cleaned kwargs: %s' % self._api_kwargs)
+        logger.api_debug(u'Tautulli APIv2 :: Cleaned kwargs: %s' %
+                         self._api_kwargs)
 
         return self._api_kwargs
 
-    def get_logs(self, sort='', search='', order='desc', regex='', start=0, end=0, **kwargs):
+    def get_logs(self,
+                 sort='',
+                 search='',
+                 order='desc',
+                 regex='',
+                 start=0,
+                 end=0,
+                 **kwargs):
         """
             Get the Tautulli logs.
 
@@ -182,7 +201,8 @@ class API2:
         end = int(end)
 
         if regex:
-            logger.api_debug(u"Tautulli APIv2 :: Filtering log using regex '%s'" % regex)
+            logger.api_debug(
+                u"Tautulli APIv2 :: Filtering log using regex '%s'" % regex)
             reg = re.compile(regex, flags=re.I)
 
         with open(logfile, 'r') as f:
@@ -201,16 +221,24 @@ class API2:
                 except IndexError:
                     # We assume this is a traceback
                     tl = (len(templog) - 1)
-                    templog[tl]['msg'] += helpers.sanitize(unicode(line.replace('\n', ''), 'utf-8'))
+                    templog[tl]['msg'] += helpers.sanitize(
+                        unicode(line.replace('\n', ''), 'utf-8'))
                     continue
 
-                if len(line) > 1 and temp_loglevel_and_time is not None and loglvl in line:
+                if len(
+                        line
+                ) > 1 and temp_loglevel_and_time is not None and loglvl in line:
 
                     d = {
-                        'time': temp_loglevel_and_time[0],
-                        'loglevel': loglvl,
-                        'msg': helpers.sanitize(unicode(msg.replace('\n', ''), 'utf-8')),
-                        'thread': thread
+                        'time':
+                        temp_loglevel_and_time[0],
+                        'loglevel':
+                        loglvl,
+                        'msg':
+                        helpers.sanitize(
+                            unicode(msg.replace('\n', ''), 'utf-8')),
+                        'thread':
+                        thread
                     }
                     templog.append(d)
 
@@ -218,16 +246,23 @@ class API2:
             templog = templog[::-1]
 
         if end > 0 or start > 0:
-            logger.api_debug(u"Tautulli APIv2 :: Slicing the log from %s to %s" % (start, end))
+            logger.api_debug(
+                u"Tautulli APIv2 :: Slicing the log from %s to %s" %
+                (start, end))
             templog = templog[start:end]
 
         if sort:
-            logger.api_debug(u"Tautulli APIv2 :: Sorting log based on '%s'" % sort)
+            logger.api_debug(u"Tautulli APIv2 :: Sorting log based on '%s'" %
+                             sort)
             templog = sorted(templog, key=lambda k: k[sort])
 
         if search:
-            logger.api_debug(u"Tautulli APIv2 :: Searching log values for '%s'" % search)
-            tt = [d for d in templog for k, v in d.items() if search.lower() in v.lower()]
+            logger.api_debug(
+                u"Tautulli APIv2 :: Searching log values for '%s'" % search)
+            tt = [
+                d for d in templog for k, v in d.items()
+                if search.lower() in v.lower()
+            ]
 
             if len(tt):
                 templog = tt
@@ -235,7 +270,8 @@ class API2:
         if regex:
             tt = []
             for l in templog:
-                stringdict = ' '.join(u'{}{}'.format(k, v) for k, v in l.items())
+                stringdict = ' '.join(u'{}{}'.format(k, v)
+                                      for k, v in l.items())
                 if reg.search(stringdict):
                     tt.append(l)
 
@@ -264,8 +300,10 @@ class API2:
         """
 
         interface_dir = os.path.join(plexpy.PROG_DIR, 'data/interfaces/')
-        interface_list = [name for name in os.listdir(interface_dir) if
-                          os.path.isdir(os.path.join(interface_dir, name))]
+        interface_list = [
+            name for name in os.listdir(interface_dir)
+            if os.path.isdir(os.path.join(interface_dir, name))
+        ]
 
         conf = plexpy.CONFIG._config
         config = {}
@@ -319,8 +357,11 @@ class API2:
             self.backup_db()
         else:
             # If the backup is less then 24 h old lets make a backup
-            if not any(os.path.getctime(os.path.join(plexpy.CONFIG.BACKUP_DIR, file_)) > (time.time() - 86400)
-                    and file_.endswith('.db') for file_ in os.listdir(plexpy.CONFIG.BACKUP_DIR)):
+            if not any(
+                    os.path.getctime(
+                        os.path.join(plexpy.CONFIG.BACKUP_DIR, file_)) >
+                (time.time() - 86400) and file_.endswith('.db')
+                    for file_ in os.listdir(plexpy.CONFIG.BACKUP_DIR)):
                 self.backup_db()
 
         db = database.MonitorDatabase()
@@ -371,7 +412,11 @@ class API2:
 
         return data
 
-    def register_device(self, device_id='', device_name='', friendly_name='', **kwargs):
+    def register_device(self,
+                        device_id='',
+                        device_name='',
+                        friendly_name='',
+                        **kwargs):
         """ Registers the Tautulli Android App for notifications.
 
             ```
@@ -411,7 +456,11 @@ class API2:
 
         return
 
-    def notify(self, notifier_id='', subject='Tautulli', body='Test notification', **kwargs):
+    def notify(self,
+               notifier_id='',
+               subject='Tautulli',
+               body='Test notification',
+               **kwargs):
         """ Send a notification using Tautulli.
 
             ```
@@ -455,7 +504,12 @@ class API2:
 
         return
 
-    def notify_newsletter(self, newsletter_id='', subject='', body='', message='', **kwargs):
+    def notify_newsletter(self,
+                          newsletter_id='',
+                          subject='',
+                          body='',
+                          message='',
+                          **kwargs):
         """ Send a newsletter using Tautulli.
 
             ```
@@ -476,7 +530,8 @@ class API2:
             self._api_result_type = 'error'
             return
 
-        newsletter = newsletters.get_newsletter_config(newsletter_id=newsletter_id)
+        newsletter = newsletters.get_newsletter_config(
+            newsletter_id=newsletter_id)
 
         if not newsletter:
             self._api_msg = 'Newsletter failed: invalid newsletter_id provided %s.' % newsletter_id
@@ -598,7 +653,13 @@ General optional parameters:
 
         if data is None:
             data = {}
-        return {"response": {"result": result_type, "message": msg, "data": data}}
+        return {
+            "response": {
+                "result": result_type,
+                "message": msg,
+                "data": data
+            }
+        }
 
     def _api_out_as(self, out):
         """ Formats the response to the desired output """
@@ -615,19 +676,25 @@ General optional parameters:
                 return out['response']['data']
 
         if self._api_out_type == 'json':
-            cherrypy.response.headers['Content-Type'] = 'application/json;charset=UTF-8'
+            cherrypy.response.headers[
+                'Content-Type'] = 'application/json;charset=UTF-8'
             try:
                 if self._api_debug:
-                    out = json.dumps(out, indent=4, sort_keys=True, ensure_ascii=False).encode('utf-8')
+                    out = json.dumps(out,
+                                     indent=4,
+                                     sort_keys=True,
+                                     ensure_ascii=False).encode('utf-8')
                 else:
                     out = json.dumps(out, ensure_ascii=False).encode('utf-8')
                 if self._api_callback is not None:
-                    cherrypy.response.headers['Content-Type'] = 'application/javascript'
+                    cherrypy.response.headers[
+                        'Content-Type'] = 'application/javascript'
                     # wrap with JSONP call if requested
                     out = self._api_callback + '(' + out + ');'
             # if we fail to generate the output fake an error
             except Exception as e:
-                logger.api_exception(u'Tautulli APIv2 :: ' + traceback.format_exc())
+                logger.api_exception(u'Tautulli APIv2 :: ' +
+                                     traceback.format_exc())
                 self._api_response_code = 500
                 out['message'] = traceback.format_exc()
                 out['result'] = 'error'
@@ -637,7 +704,8 @@ General optional parameters:
             try:
                 out = xmltodict.unparse(out, pretty=True)
             except Exception as e:
-                logger.api_error(u'Tautulli APIv2 :: Failed to parse xml result')
+                logger.api_error(
+                    u'Tautulli APIv2 :: Failed to parse xml result')
                 self._api_response_code = 500
                 try:
                     out['message'] = e
@@ -645,7 +713,9 @@ General optional parameters:
                     out = xmltodict.unparse(out, pretty=True)
 
                 except Exception as e:
-                    logger.api_error(u'Tautulli APIv2 :: Failed to parse xml result error message %s' % e)
+                    logger.api_error(
+                        u'Tautulli APIv2 :: Failed to parse xml result error message %s'
+                        % e)
                     out = '''<?xml version="1.0" encoding="utf-8"?>
                                 <response>
                                     <message>%s</message>
@@ -660,7 +730,8 @@ General optional parameters:
         """ handles the stuff from the handler """
 
         result = {}
-        logger.api_debug(u'Tautulli APIv2 :: API called with kwargs: %s' % kwargs)
+        logger.api_debug(u'Tautulli APIv2 :: API called with kwargs: %s' %
+                         kwargs)
 
         self._api_validate(**kwargs)
 
@@ -678,7 +749,9 @@ General optional parameters:
 
                 result = call(**self._api_kwargs)
             except Exception as e:
-                logger.api_error(u'Tautulli APIv2 :: Failed to run %s with %s: %s' % (self._api_cmd, self._api_kwargs, e))
+                logger.api_error(
+                    u'Tautulli APIv2 :: Failed to run %s with %s: %s' %
+                    (self._api_cmd, self._api_kwargs, e))
                 self._api_response_code = 500
                 if self._api_debug:
                     cherrypy.request.show_tracebacks = True
@@ -708,7 +781,8 @@ General optional parameters:
         if ret is None:
             ret = result
 
-        if (ret is not None or self._api_result_type == 'success') and self._api_authenticated:
+        if (ret is not None or self._api_result_type == 'success'
+            ) and self._api_authenticated:
             # To allow override for restart etc
             # if the call returns some data we are gonna assume its a success
             self._api_result_type = 'success'
@@ -732,4 +806,7 @@ General optional parameters:
             self._api_response_code = 500
 
         cherrypy.response.status = self._api_response_code
-        return self._api_out_as(self._api_responds(result_type=self._api_result_type, msg=self._api_msg, data=ret))
+        return self._api_out_as(
+            self._api_responds(result_type=self._api_result_type,
+                               msg=self._api_msg,
+                               data=ret))

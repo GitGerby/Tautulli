@@ -18,4 +18,3 @@ class PlexPyException(Exception):
     """
     Generic Tautulli Exception - should never be thrown, only subclassed
     """
-

@@ -60,6 +60,7 @@ def addtoapi(*dargs, **dkwargs):
             @addtoapi()
 
     """
+
     def rd(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
@@ -83,7 +84,8 @@ def addtoapi(*dargs, **dkwargs):
 
 
 def multikeysort(items, columns):
-    comparers = [((itemgetter(col[1:].strip()), -1) if col.startswith('-') else (itemgetter(col.strip()), 1)) for col in columns]
+    comparers = [((itemgetter(col[1:].strip()), -1) if col.startswith('-') else
+                  (itemgetter(col.strip()), 1)) for col in columns]
 
     def comparer(left, right):
         for fn, mult in comparers:
@@ -116,31 +118,103 @@ def latinToAscii(unicrap):
     From couch potato
     """
     xlate = {
-        0xc0: 'A', 0xc1: 'A', 0xc2: 'A', 0xc3: 'A', 0xc4: 'A', 0xc5: 'A',
-        0xc6: 'Ae', 0xc7: 'C',
-        0xc8: 'E', 0xc9: 'E', 0xca: 'E', 0xcb: 'E', 0x86: 'e',
-        0xcc: 'I', 0xcd: 'I', 0xce: 'I', 0xcf: 'I',
-        0xd0: 'Th', 0xd1: 'N',
-        0xd2: 'O', 0xd3: 'O', 0xd4: 'O', 0xd5: 'O', 0xd6: 'O', 0xd8: 'O',
-        0xd9: 'U', 0xda: 'U', 0xdb: 'U', 0xdc: 'U',
-        0xdd: 'Y', 0xde: 'th', 0xdf: 'ss',
-        0xe0: 'a', 0xe1: 'a', 0xe2: 'a', 0xe3: 'a', 0xe4: 'a', 0xe5: 'a',
-        0xe6: 'ae', 0xe7: 'c',
-        0xe8: 'e', 0xe9: 'e', 0xea: 'e', 0xeb: 'e', 0x0259: 'e',
-        0xec: 'i', 0xed: 'i', 0xee: 'i', 0xef: 'i',
-        0xf0: 'th', 0xf1: 'n',
-        0xf2: 'o', 0xf3: 'o', 0xf4: 'o', 0xf5: 'o', 0xf6: 'o', 0xf8: 'o',
-        0xf9: 'u', 0xfa: 'u', 0xfb: 'u', 0xfc: 'u',
-        0xfd: 'y', 0xfe: 'th', 0xff: 'y',
-        0xa1: '!', 0xa2: '{cent}', 0xa3: '{pound}', 0xa4: '{currency}',
-        0xa5: '{yen}', 0xa6: '|', 0xa7: '{section}', 0xa8: '{umlaut}',
-        0xa9: '{C}', 0xaa: '{^a}', 0xab: '&lt;&lt;', 0xac: '{not}',
-        0xad: '-', 0xae: '{R}', 0xaf: '_', 0xb0: '{degrees}',
-        0xb1: '{+/-}', 0xb2: '{^2}', 0xb3: '{^3}', 0xb4: "'",
-        0xb5: '{micro}', 0xb6: '{paragraph}', 0xb7: '*', 0xb8: '{cedilla}',
-        0xb9: '{^1}', 0xba: '{^o}', 0xbb: '&gt;&gt;',
-        0xbc: '{1/4}', 0xbd: '{1/2}', 0xbe: '{3/4}', 0xbf: '?',
-        0xd7: '*', 0xf7: '/'
+        0xc0: 'A',
+        0xc1: 'A',
+        0xc2: 'A',
+        0xc3: 'A',
+        0xc4: 'A',
+        0xc5: 'A',
+        0xc6: 'Ae',
+        0xc7: 'C',
+        0xc8: 'E',
+        0xc9: 'E',
+        0xca: 'E',
+        0xcb: 'E',
+        0x86: 'e',
+        0xcc: 'I',
+        0xcd: 'I',
+        0xce: 'I',
+        0xcf: 'I',
+        0xd0: 'Th',
+        0xd1: 'N',
+        0xd2: 'O',
+        0xd3: 'O',
+        0xd4: 'O',
+        0xd5: 'O',
+        0xd6: 'O',
+        0xd8: 'O',
+        0xd9: 'U',
+        0xda: 'U',
+        0xdb: 'U',
+        0xdc: 'U',
+        0xdd: 'Y',
+        0xde: 'th',
+        0xdf: 'ss',
+        0xe0: 'a',
+        0xe1: 'a',
+        0xe2: 'a',
+        0xe3: 'a',
+        0xe4: 'a',
+        0xe5: 'a',
+        0xe6: 'ae',
+        0xe7: 'c',
+        0xe8: 'e',
+        0xe9: 'e',
+        0xea: 'e',
+        0xeb: 'e',
+        0x0259: 'e',
+        0xec: 'i',
+        0xed: 'i',
+        0xee: 'i',
+        0xef: 'i',
+        0xf0: 'th',
+        0xf1: 'n',
+        0xf2: 'o',
+        0xf3: 'o',
+        0xf4: 'o',
+        0xf5: 'o',
+        0xf6: 'o',
+        0xf8: 'o',
+        0xf9: 'u',
+        0xfa: 'u',
+        0xfb: 'u',
+        0xfc: 'u',
+        0xfd: 'y',
+        0xfe: 'th',
+        0xff: 'y',
+        0xa1: '!',
+        0xa2: '{cent}',
+        0xa3: '{pound}',
+        0xa4: '{currency}',
+        0xa5: '{yen}',
+        0xa6: '|',
+        0xa7: '{section}',
+        0xa8: '{umlaut}',
+        0xa9: '{C}',
+        0xaa: '{^a}',
+        0xab: '&lt;&lt;',
+        0xac: '{not}',
+        0xad: '-',
+        0xae: '{R}',
+        0xaf: '_',
+        0xb0: '{degrees}',
+        0xb1: '{+/-}',
+        0xb2: '{^2}',
+        0xb3: '{^3}',
+        0xb4: "'",
+        0xb5: '{micro}',
+        0xb6: '{paragraph}',
+        0xb7: '*',
+        0xb8: '{cedilla}',
+        0xb9: '{^1}',
+        0xba: '{^o}',
+        0xbb: '&gt;&gt;',
+        0xbc: '{1/4}',
+        0xbd: '{1/2}',
+        0xbe: '{3/4}',
+        0xbf: '?',
+        0xd7: '*',
+        0xf7: '/'
     }
 
     r = ''
@@ -257,7 +331,8 @@ def format_timedelta_Hms(td):
     hours = s // 3600
     minutes = (s % 3600) // 60
     seconds = s % 60
-    return '{:02d}:{:02d}:{:02d}'.format(int(hours), int(minutes), int(seconds))
+    return '{:02d}:{:02d}:{:02d}'.format(int(hours), int(minutes),
+                                         int(seconds))
 
 
 def get_age(date):
@@ -268,7 +343,8 @@ def get_age(date):
         return False
 
     try:
-        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(split_date[2])
+        days_old = int(split_date[0]) * 365 + int(split_date[1]) * 30 + int(
+            split_date[2])
     except IndexError:
         days_old = False
 
@@ -326,7 +402,8 @@ def replace_all(text, dic, normalize=False):
                 else:
                     j = unicodedata.normalize('NFC', j)
             except TypeError:
-                j = unicodedata.normalize('NFC', j.decode(plexpy.SYS_ENCODING, 'replace'))
+                j = unicodedata.normalize(
+                    'NFC', j.decode(plexpy.SYS_ENCODING, 'replace'))
         text = text.replace(i, j)
     return text
 
@@ -343,7 +420,9 @@ def replace_illegal_chars(string, type="file"):
 def cleanName(string):
 
     pass1 = latinToAscii(string).lower()
-    out_string = re.sub('[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '', pass1).encode('utf-8')
+    out_string = re.sub(
+        '[\.\-\/\!\@\#\$\%\^\&\*\(\)\+\-\"\'\,\;\:\[\]\{\}\<\>\=\_]', '',
+        pass1).encode('utf-8')
 
     return out_string
 
@@ -394,7 +473,9 @@ def split_path(f):
 
 def extract_logline(s):
     # Default log format
-    pattern = re.compile(r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)', re.VERBOSE)
+    pattern = re.compile(
+        r'(?P<timestamp>.*?)\s\-\s(?P<level>.*?)\s*\:\:\s(?P<thread>.*?)\s\:\s(?P<message>.*)',
+        re.VERBOSE)
     match = pattern.match(s)
     if match:
         timestamp = match.group("timestamp")
@@ -424,14 +505,18 @@ def create_https_certificates(ssl_cert, ssl_key):
     from certgen import createKeyPair, createSelfSignedCertificate, TYPE_RSA
 
     serial = int(time.time())
-    domains = ['DNS:' + d.strip() for d in plexpy.CONFIG.HTTPS_DOMAIN.split(',') if d]
+    domains = [
+        'DNS:' + d.strip() for d in plexpy.CONFIG.HTTPS_DOMAIN.split(',') if d
+    ]
     ips = ['IP:' + d.strip() for d in plexpy.CONFIG.HTTPS_IP.split(',') if d]
     altNames = ','.join(domains + ips)
 
     # Create the self-signed Tautulli certificate
     logger.debug(u"Generating self-signed SSL certificate.")
     pkey = createKeyPair(TYPE_RSA, 2048)
-    cert = createSelfSignedCertificate(("Tautulli", pkey), serial, (0, 60 * 60 * 24 * 365 * 10), altNames) # ten years
+    cert = createSelfSignedCertificate(("Tautulli", pkey), serial,
+                                       (0, 60 * 60 * 24 * 365 * 10),
+                                       altNames)  # ten years
 
     # Save the key and certificate to disk
     try:
@@ -533,11 +618,14 @@ def process_json_kwargs(json_kwargs):
 def sanitize_out(*dargs, **dkwargs):
     """ Helper decorator that sanitized the output
     """
+
     def rd(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
             return sanitize(function(*args, **kwargs))
+
         return wrapper
+
     return rd
 
 
@@ -568,7 +656,8 @@ def get_ip(host):
     else:
         try:
             ip_address = socket.getaddrinfo(host, None)[0][4][0]
-            logger.debug(u"IP Checker :: Resolved %s to %s." % (host, ip_address))
+            logger.debug(u"IP Checker :: Resolved %s to %s." %
+                         (host, ip_address))
         except:
             logger.error(u"IP Checker :: Bad IP or hostname provided.")
     return ip_address
@@ -591,16 +680,20 @@ def install_geoip_db():
     md5_checksum = ''
 
     temp_gz = os.path.join(plexpy.CONFIG.CACHE_DIR, geolite2_gz)
-    geolite2_db = plexpy.CONFIG.GEOIP_DB or os.path.join(plexpy.DATA_DIR, geolite2_db)
+    geolite2_db = plexpy.CONFIG.GEOIP_DB or os.path.join(
+        plexpy.DATA_DIR, geolite2_db)
 
     # Retrieve the GeoLite2 gzip file
-    logger.debug(u"Tautulli Helpers :: Downloading GeoLite2 gzip file from MaxMind...")
+    logger.debug(
+        u"Tautulli Helpers :: Downloading GeoLite2 gzip file from MaxMind...")
     try:
         maxmind = urllib.URLopener()
         maxmind.retrieve(maxmind_url + geolite2_gz, temp_gz)
         md5_checksum = urllib2.urlopen(maxmind_url + geolite2_md5).read()
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Failed to download GeoLite2 gzip file from MaxMind: %s" % e)
+        logger.error(
+            u"Tautulli Helpers :: Failed to download GeoLite2 gzip file from MaxMind: %s"
+            % e)
         return False
 
     # Extract the GeoLite2 database file
@@ -610,11 +703,14 @@ def install_geoip_db():
             with open(geolite2_db, 'wb') as db:
                 db.write(gz.read())
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Failed to extract the GeoLite2 database: %s" % e)
+        logger.error(
+            u"Tautulli Helpers :: Failed to extract the GeoLite2 database: %s"
+            % e)
         return False
 
     # Check MD5 hash for GeoLite2 database file
-    logger.debug(u"Tautulli Helpers :: Checking MD5 checksum for GeoLite2 database...")
+    logger.debug(
+        u"Tautulli Helpers :: Checking MD5 checksum for GeoLite2 database...")
     try:
         hash_md5 = hashlib.md5()
         with open(geolite2_db, 'rb') as f:
@@ -623,21 +719,28 @@ def install_geoip_db():
         md5_hash = hash_md5.hexdigest()
 
         if md5_hash != md5_checksum:
-            logger.error(u"Tautulli Helpers :: MD5 checksum doesn't match for GeoLite2 database. "
-                         "Checksum: %s, file hash: %s" % (md5_checksum, md5_hash))
+            logger.error(
+                u"Tautulli Helpers :: MD5 checksum doesn't match for GeoLite2 database. "
+                "Checksum: %s, file hash: %s" % (md5_checksum, md5_hash))
             return False
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Failed to generate MD5 checksum for GeoLite2 database: %s" % e)
+        logger.error(
+            u"Tautulli Helpers :: Failed to generate MD5 checksum for GeoLite2 database: %s"
+            % e)
         return False
 
     # Delete temportary GeoLite2 gzip file
-    logger.debug(u"Tautulli Helpers :: Deleting temporary GeoLite2 gzip file...")
+    logger.debug(
+        u"Tautulli Helpers :: Deleting temporary GeoLite2 gzip file...")
     try:
         os.remove(temp_gz)
     except Exception as e:
-        logger.warn(u"Tautulli Helpers :: Failed to remove temporary GeoLite2 gzip file: %s" % e)
+        logger.warn(
+            u"Tautulli Helpers :: Failed to remove temporary GeoLite2 gzip file: %s"
+            % e)
 
-    logger.debug(u"Tautulli Helpers :: GeoLite2 database installed successfully.")
+    logger.debug(
+        u"Tautulli Helpers :: GeoLite2 database installed successfully.")
     plexpy.CONFIG.__setattr__('GEOIP_DB', geolite2_db)
     plexpy.CONFIG.write()
 
@@ -651,10 +754,13 @@ def uninstall_geoip_db():
         plexpy.CONFIG.__setattr__('GEOIP_DB', '')
         plexpy.CONFIG.write()
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Failed to uninstall the GeoLite2 database: %s" % e)
+        logger.error(
+            u"Tautulli Helpers :: Failed to uninstall the GeoLite2 database: %s"
+            % e)
         return False
 
-    logger.debug(u"Tautulli Helpers :: GeoLite2 database uninstalled successfully.")
+    logger.debug(
+        u"Tautulli Helpers :: GeoLite2 database uninstalled successfully.")
     return True
 
 
@@ -683,16 +789,17 @@ def geoip_lookup(ip_address):
     except Exception as e:
         return 'Error: %s' % e
 
-    geo_info = {'continent': geo.continent.name,
-                'country': geo.country.name,
-                'region': geo.subdivisions.most_specific.name,
-                'city': geo.city.name,
-                'postal_code': geo.postal.code,
-                'timezone': geo.location.time_zone,
-                'latitude': geo.location.latitude,
-                'longitude': geo.location.longitude,
-                'accuracy': geo.location.accuracy_radius
-                }
+    geo_info = {
+        'continent': geo.continent.name,
+        'country': geo.country.name,
+        'region': geo.subdivisions.most_specific.name,
+        'city': geo.city.name,
+        'postal_code': geo.postal.code,
+        'timezone': geo.location.time_zone,
+        'latitude': geo.location.latitude,
+        'longitude': geo.location.longitude,
+        'accuracy': geo.location.accuracy_radius
+    }
 
     return geo_info
 
@@ -708,7 +815,7 @@ def whois_lookup(ip_address):
         for net in nets:
             net['country'] = countries.get(net['country'])
             if net['postal_code']:
-                 net['postal_code'] = net['postal_code'].replace('-', ' ')
+                net['postal_code'] = net['postal_code'].replace('-', ' ')
     except ValueError as e:
         err = 'Invalid IP address provided: %s.' % ip_address
     except ipwhois.exceptions.IPDefinedError as e:
@@ -724,9 +831,7 @@ def whois_lookup(ip_address):
     except Exception as e:
         host = 'Not available'
 
-    whois_info = {"host": host,
-                  "nets": nets
-                  }
+    whois_info = {"host": host, "nets": nets}
 
     if err:
         whois_info['error'] = err
@@ -739,7 +844,8 @@ def anon_url(*url):
     """
     Return a URL string consisting of the Anonymous redirect URL and an arbitrary number of values appended.
     """
-    return '' if None in url else '%s%s' % (plexpy.CONFIG.ANON_REDIRECT, ''.join(str(s) for s in url))
+    return '' if None in url else '%s%s' % (plexpy.CONFIG.ANON_REDIRECT,
+                                            ''.join(str(s) for s in url))
 
 
 def get_img_service(include_self=False):
@@ -758,31 +864,43 @@ def upload_to_imgur(img_data, img_title='', rating_key='', fallback=''):
     img_url = delete_hash = ''
 
     if not plexpy.CONFIG.IMGUR_CLIENT_ID:
-        logger.error(u"Tautulli Helpers :: Cannot upload image to Imgur. No Imgur client id specified in the settings.")
+        logger.error(
+            u"Tautulli Helpers :: Cannot upload image to Imgur. No Imgur client id specified in the settings."
+        )
         return img_url, delete_hash
 
     headers = {'Authorization': 'Client-ID %s' % plexpy.CONFIG.IMGUR_CLIENT_ID}
-    data = {'image': base64.b64encode(img_data),
-            'title': img_title.encode('utf-8'),
-            'name': str(rating_key) + '.png',
-            'type': 'png'}
+    data = {
+        'image': base64.b64encode(img_data),
+        'title': img_title.encode('utf-8'),
+        'name': str(rating_key) + '.png',
+        'type': 'png'
+    }
 
-    response, err_msg, req_msg = request.request_response2('https://api.imgur.com/3/image', 'POST',
-                                                           headers=headers, data=data)
+    response, err_msg, req_msg = request.request_response2(
+        'https://api.imgur.com/3/image', 'POST', headers=headers, data=data)
 
     if response and not err_msg:
-        logger.debug(u"Tautulli Helpers :: Image '{}' ({}) uploaded to Imgur.".format(img_title, fallback))
+        logger.debug(
+            u"Tautulli Helpers :: Image '{}' ({}) uploaded to Imgur.".format(
+                img_title, fallback))
         imgur_response_data = response.json().get('data')
-        img_url = imgur_response_data.get('link', '').replace('http://', 'https://')
+        img_url = imgur_response_data.get('link',
+                                          '').replace('http://', 'https://')
         delete_hash = imgur_response_data.get('deletehash', '')
     else:
         if err_msg:
-            logger.error(u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Imgur: {}".format(img_title, fallback, err_msg))
+            logger.error(
+                u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Imgur: {}"
+                .format(img_title, fallback, err_msg))
         else:
-            logger.error(u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Imgur.".format(img_title, fallback))
+            logger.error(
+                u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Imgur."
+                .format(img_title, fallback))
 
         if req_msg:
-            logger.debug(u"Tautulli Helpers :: Request response: {}".format(req_msg))
+            logger.debug(
+                u"Tautulli Helpers :: Request response: {}".format(req_msg))
 
     return img_url, delete_hash
 
@@ -790,22 +908,32 @@ def upload_to_imgur(img_data, img_title='', rating_key='', fallback=''):
 def delete_from_imgur(delete_hash, img_title='', fallback=''):
     """ Deletes an image from Imgur """
     if not plexpy.CONFIG.IMGUR_CLIENT_ID:
-        logger.error(u"Tautulli Helpers :: Cannot delete image from Imgur. No Imgur client id specified in the settings.")
+        logger.error(
+            u"Tautulli Helpers :: Cannot delete image from Imgur. No Imgur client id specified in the settings."
+        )
         return False
 
     headers = {'Authorization': 'Client-ID %s' % plexpy.CONFIG.IMGUR_CLIENT_ID}
 
-    response, err_msg, req_msg = request.request_response2('https://api.imgur.com/3/image/%s' % delete_hash, 'DELETE',
-                                                           headers=headers)
+    response, err_msg, req_msg = request.request_response2(
+        'https://api.imgur.com/3/image/%s' % delete_hash,
+        'DELETE',
+        headers=headers)
 
     if response and not err_msg:
-        logger.debug(u"Tautulli Helpers :: Image '{}' ({}) deleted from Imgur.".format(img_title, fallback))
+        logger.debug(
+            u"Tautulli Helpers :: Image '{}' ({}) deleted from Imgur.".format(
+                img_title, fallback))
         return True
     else:
         if err_msg:
-            logger.error(u"Tautulli Helpers :: Unable to delete image '{}' ({}) from Imgur: {}".format(img_title, fallback, err_msg))
+            logger.error(
+                u"Tautulli Helpers :: Unable to delete image '{}' ({}) from Imgur: {}"
+                .format(img_title, fallback, err_msg))
         else:
-            logger.error(u"Tautulli Helpers :: Unable to delete image '{}' ({}) from Imgur.".format(img_title, fallback))
+            logger.error(
+                u"Tautulli Helpers :: Unable to delete image '{}' ({}) from Imgur."
+                .format(img_title, fallback))
         return False
 
 
@@ -814,24 +942,34 @@ def upload_to_cloudinary(img_data, img_title='', rating_key='', fallback=''):
     img_url = ''
 
     if not plexpy.CONFIG.CLOUDINARY_CLOUD_NAME or not plexpy.CONFIG.CLOUDINARY_API_KEY or not plexpy.CONFIG.CLOUDINARY_API_SECRET:
-        logger.error(u"Tautulli Helpers :: Cannot upload image to Cloudinary. Cloudinary settings not specified in the settings.")
+        logger.error(
+            u"Tautulli Helpers :: Cannot upload image to Cloudinary. Cloudinary settings not specified in the settings."
+        )
         return img_url
 
-    cloudinary.config(
-        cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
-        api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
-        api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET
-    )
+    cloudinary.config(cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
+                      api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
+                      api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET)
 
     try:
-        response = upload('data:image/png;base64,{}'.format(base64.b64encode(img_data)),
+        response = upload('data:image/png;base64,{}'.format(
+            base64.b64encode(img_data)),
                           public_id='{}_{}'.format(fallback, rating_key),
-                          tags=['tautulli', fallback, str(rating_key)],
-                          context={'title': img_title.encode('utf-8'), 'rating_key': str(rating_key), 'fallback': fallback})
-        logger.debug(u"Tautulli Helpers :: Image '{}' ({}) uploaded to Cloudinary.".format(img_title, fallback))
+                          tags=['tautulli', fallback,
+                                str(rating_key)],
+                          context={
+                              'title': img_title.encode('utf-8'),
+                              'rating_key': str(rating_key),
+                              'fallback': fallback
+                          })
+        logger.debug(
+            u"Tautulli Helpers :: Image '{}' ({}) uploaded to Cloudinary.".
+            format(img_title, fallback))
         img_url = response.get('url', '')
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Cloudinary: {}".format(img_title, fallback, e))
+        logger.error(
+            u"Tautulli Helpers :: Unable to upload image '{}' ({}) to Cloudinary: {}"
+            .format(img_title, fallback, e))
 
     return img_url
 
@@ -839,46 +977,60 @@ def upload_to_cloudinary(img_data, img_title='', rating_key='', fallback=''):
 def delete_from_cloudinary(rating_key=None, delete_all=False):
     """ Deletes an image from Cloudinary """
     if not plexpy.CONFIG.CLOUDINARY_CLOUD_NAME or not plexpy.CONFIG.CLOUDINARY_API_KEY or not plexpy.CONFIG.CLOUDINARY_API_SECRET:
-        logger.error(u"Tautulli Helpers :: Cannot delete image from Cloudinary. Cloudinary settings not specified in the settings.")
+        logger.error(
+            u"Tautulli Helpers :: Cannot delete image from Cloudinary. Cloudinary settings not specified in the settings."
+        )
         return False
 
-    cloudinary.config(
-        cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
-        api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
-        api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET
-    )
+    cloudinary.config(cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
+                      api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
+                      api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET)
 
     if delete_all:
         delete_resources_by_tag('tautulli')
-        logger.debug(u"Tautulli Helpers :: Deleted all images from Cloudinary.")
+        logger.debug(
+            u"Tautulli Helpers :: Deleted all images from Cloudinary.")
     elif rating_key:
         delete_resources_by_tag(str(rating_key))
-        logger.debug(u"Tautulli Helpers :: Deleted images from Cloudinary with rating_key {}.".format(rating_key))
+        logger.debug(
+            u"Tautulli Helpers :: Deleted images from Cloudinary with rating_key {}."
+            .format(rating_key))
     else:
-        logger.debug(u"Tautulli Helpers :: Unable to delete images from Cloudinary: No rating_key provided.")
+        logger.debug(
+            u"Tautulli Helpers :: Unable to delete images from Cloudinary: No rating_key provided."
+        )
 
     return True
 
 
-def cloudinary_transform(rating_key=None, width=1000, height=1500, opacity=100, background='000000', blur=0,
-                         img_format='png', img_title='', fallback=None):
+def cloudinary_transform(rating_key=None,
+                         width=1000,
+                         height=1500,
+                         opacity=100,
+                         background='000000',
+                         blur=0,
+                         img_format='png',
+                         img_title='',
+                         fallback=None):
     url = ''
 
     if not plexpy.CONFIG.CLOUDINARY_CLOUD_NAME or not plexpy.CONFIG.CLOUDINARY_API_KEY or not plexpy.CONFIG.CLOUDINARY_API_SECRET:
-        logger.error(u"Tautulli Helpers :: Cannot transform image on Cloudinary. Cloudinary settings not specified in the settings.")
+        logger.error(
+            u"Tautulli Helpers :: Cannot transform image on Cloudinary. Cloudinary settings not specified in the settings."
+        )
         return url
 
-    cloudinary.config(
-        cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
-        api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
-        api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET
-    )
+    cloudinary.config(cloud_name=plexpy.CONFIG.CLOUDINARY_CLOUD_NAME,
+                      api_key=plexpy.CONFIG.CLOUDINARY_API_KEY,
+                      api_secret=plexpy.CONFIG.CLOUDINARY_API_SECRET)
 
-    img_options = {'format': img_format,
-                   'fetch_format': 'auto',
-                   'quality': 'auto',
-                   'version': int(time.time()),
-                   'secure': True}
+    img_options = {
+        'format': img_format,
+        'fetch_format': 'auto',
+        'quality': 'auto',
+        'version': int(time.time()),
+        'secure': True
+    }
 
     if width != 1000:
         img_options['width'] = str(width)
@@ -894,10 +1046,15 @@ def cloudinary_transform(rating_key=None, width=1000, height=1500, opacity=100, 
         img_options['effect'] = 'blur:{}'.format(blur * 100)
 
     try:
-        url, options = cloudinary_url('{}_{}'.format(fallback, rating_key), **img_options)
-        logger.debug(u"Tautulli Helpers :: Image '{}' ({}) transformed on Cloudinary.".format(img_title, fallback))
+        url, options = cloudinary_url('{}_{}'.format(fallback, rating_key),
+                                      **img_options)
+        logger.debug(
+            u"Tautulli Helpers :: Image '{}' ({}) transformed on Cloudinary.".
+            format(img_title, fallback))
     except Exception as e:
-        logger.error(u"Tautulli Helpers :: Unable to transform image '{}' ({}) on Cloudinary: {}".format(img_title, fallback, e))
+        logger.error(
+            u"Tautulli Helpers :: Unable to transform image '{}' ({}) on Cloudinary: {}"
+            .format(img_title, fallback, e))
 
     return url
 
@@ -910,7 +1067,9 @@ def cache_image(url, image=None):
     # Create image directory if it doesn't exist
     imgdir = os.path.join(plexpy.CONFIG.CACHE_DIR, 'images/')
     if not os.path.exists(imgdir):
-        logger.debug(u"Tautulli Helpers :: Creating image cache directory at %s" % imgdir)
+        logger.debug(
+            u"Tautulli Helpers :: Creating image cache directory at %s" %
+            imgdir)
         os.makedirs(imgdir)
 
     # Create a hash of the url to use as the filename
@@ -923,7 +1082,8 @@ def cache_image(url, image=None):
             with open(imagefile, 'wb') as cache_file:
                 cache_file.write(image)
         except IOError as e:
-            logger.error(u"Tautulli Helpers :: Failed to cache image %s: %s" % (imagefile, e))
+            logger.error(u"Tautulli Helpers :: Failed to cache image %s: %s" %
+                         (imagefile, e))
 
     # Try to return the image from the cache directory
     if os.path.isfile(imagefile):
@@ -941,22 +1101,32 @@ def build_datatables_json(kwargs, dt_columns, default_sort_col=None):
         dt_columns:    list of tuples [("column name", "orderable", "searchable"), ...]
     """
 
-    columns = [{"data": c[0], "orderable": c[1], "searchable": c[2]} for c in dt_columns]
+    columns = [{
+        "data": c[0],
+        "orderable": c[1],
+        "searchable": c[2]
+    } for c in dt_columns]
 
     if not default_sort_col:
         default_sort_col = dt_columns[0][0]
 
-    order_column = [c[0] for c in dt_columns].index(kwargs.pop("order_column", default_sort_col))
+    order_column = [c[0] for c in dt_columns
+                    ].index(kwargs.pop("order_column", default_sort_col))
 
     # Build json data
-    json_data = {"draw": 1,
-                 "columns": columns,
-                 "order": [{"column": order_column,
-                            "dir": kwargs.pop("order_dir", "desc")}],
-                 "start": int(kwargs.pop("start", 0)),
-                 "length": int(kwargs.pop("length", 25)),
-                 "search": {"value": kwargs.pop("search", "")}
-                 }
+    json_data = {
+        "draw": 1,
+        "columns": columns,
+        "order": [{
+            "column": order_column,
+            "dir": kwargs.pop("order_dir", "desc")
+        }],
+        "start": int(kwargs.pop("start", 0)),
+        "length": int(kwargs.pop("length", 25)),
+        "search": {
+            "value": kwargs.pop("search", "")
+        }
+    }
     return json.dumps(json_data)
 
 
@@ -991,7 +1161,9 @@ def parse_condition_logic_string(s, num_cond=0):
     valid_tokens = re.compile(r'(\(|\)|and|or)')
     conditions_pattern = re.compile(r'{\d+}')
 
-    tokens = [x.strip() for x in re.split(valid_tokens, s.lower()) if x.strip()]
+    tokens = [
+        x.strip() for x in re.split(valid_tokens, s.lower()) if x.strip()
+    ]
 
     stack = [[]]
 
@@ -1042,7 +1214,7 @@ def parse_condition_logic_string(s, num_cond=0):
                 stack.pop()
                 nest_and -= 1
 
-        elif bool_next and x == 'and' and i < len(tokens)-1:
+        elif bool_next and x == 'and' and i < len(tokens) - 1:
             stack[-1].append([])
             stack.append(stack[-1][-1])
             stack[-1].append(stack[-2].pop(-2))
@@ -1053,7 +1225,7 @@ def parse_condition_logic_string(s, num_cond=0):
             close_bracket_next = False
             nest_and += 1
 
-        elif bool_next and x == 'or' and i < len(tokens)-1:
+        elif bool_next and x == 'or' and i < len(tokens) - 1:
             stack[-1].append(x)
             cond_next = True
             bool_next = False
@@ -1175,9 +1347,12 @@ def split_args(args=None):
     if isinstance(args, list):
         return args
     elif isinstance(args, basestring):
-        return [arg.decode(plexpy.SYS_ENCODING, 'ignore')
-                for arg in shlex.split(args.encode(plexpy.SYS_ENCODING, 'ignore'))]
+        return [
+            arg.decode(plexpy.SYS_ENCODING, 'ignore')
+            for arg in shlex.split(args.encode(plexpy.SYS_ENCODING, 'ignore'))
+        ]
     return []
+
 
 def mask_config_passwords(config):
     if isinstance(config, list):

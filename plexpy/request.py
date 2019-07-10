@@ -13,25 +13,27 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Tautulli.  If not, see <http://www.gnu.org/licenses/>.
 
-from bs4 import BeautifulSoup
+import collections
 from xml.dom import minidom
 
 import feedparser
-import collections
-import requests
-
+import logger
 import plexpy
 import plexpy.lock
-import logger
-
+import requests
+from bs4 import BeautifulSoup
 
 # Dictionary with last request times, for rate limiting.
 last_requests = collections.defaultdict(int)
 fake_lock = plexpy.lock.FakeLock()
 
 
-def request_response(url, method="get", auto_raise=True,
-                     whitelist_status_code=None, lock=fake_lock, **kwargs):
+def request_response(url,
+                     method="get",
+                     auto_raise=True,
+                     whitelist_status_code=None,
+                     lock=fake_lock,
+                     **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions
     and log them. On success, the Response object is returned. In case of a
@@ -59,8 +61,8 @@ def request_response(url, method="get", auto_raise=True,
     try:
         # Request URL and wait for response
         with lock:
-            logger.debug(
-                "Requesting URL via %s method: %s", method.upper(), url)
+            logger.debug("Requesting URL via %s method: %s", method.upper(),
+                         url)
             response = request_method(url, **kwargs)
 
         # If status code != OK, then raise exception, except if the status code
@@ -91,9 +93,8 @@ def request_response(url, method="get", auto_raise=True,
                 "SSL error raised during connection, with certificate "
                 "verification turned off: %s", e)
     except requests.ConnectionError:
-        logger.error(
-            "Unable to connect to remote host. Check if the remote "
-            "host is up and running.")
+        logger.error("Unable to connect to remote host. Check if the remote "
+                     "host is up and running.")
     except requests.Timeout:
         logger.error(
             "Request timed out. The remote host did not respond timely.")
@@ -107,9 +108,8 @@ def request_response(url, method="get", auto_raise=True,
                 # I don't think we will end up here, but for completeness
                 cause = "unknown"
 
-            logger.error(
-                "Request raise HTTP error with status code %d (%s).",
-                e.response.status_code, cause)
+            logger.error("Request raise HTTP error with status code %d (%s).",
+                         e.response.status_code, cause)
 
             # Debug response
             if plexpy.VERBOSE:
@@ -120,8 +120,12 @@ def request_response(url, method="get", auto_raise=True,
         logger.error("Request raised exception: %s", e)
 
 
-def request_response2(url, method="get", auto_raise=True,
-                      whitelist_status_code=None, lock=fake_lock, **kwargs):
+def request_response2(url,
+                      method="get",
+                      auto_raise=True,
+                      whitelist_status_code=None,
+                      lock=fake_lock,
+                      **kwargs):
     """
     Convenient wrapper for `requests.get', which will capture the exceptions
     and log them. On success, the Response object is returned. In case of a
@@ -180,10 +184,12 @@ def request_response2(url, method="get", auto_raise=True,
     except requests.HTTPError as e:
         if e.response is not None:
             if e.response.status_code >= 500:
-                http_err = "[{e.response.status_code}] {e.response.reason} (remote server error).".format(e=e)
+                http_err = "[{e.response.status_code}] {e.response.reason} (remote server error).".format(
+                    e=e)
 
             elif e.response.status_code >= 400:
-                http_err = "[{e.response.status_code}] {e.response.reason} (local client error).".format(e=e)
+                http_err = "[{e.response.status_code}] {e.response.reason} (local client error).".format(
+                    e=e)
 
             else:
                 http_err = "Unknown HTTP error."

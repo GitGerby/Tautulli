@@ -21,23 +21,22 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Tautulli.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import sys
-
-# Ensure lib added to path, before any other imports
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
-
 import argparse
 import datetime
 import locale
-import pytz
+import os
 import signal
+import sys
 import time
-import tzlocal
 
 import plexpy
+import pytz
+import tzlocal
 from plexpy import config, database, logger, webstart
 
+# Ensure lib added to path, before any other imports
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lib'))
 
 # Register signals, such as CTRL + C
 signal.signal(signal.SIGINT, plexpy.sig_handler)
@@ -70,33 +69,47 @@ def main():
         pass
 
     # for OSes that are poorly configured I'll just force UTF-8
-    if not plexpy.SYS_ENCODING or plexpy.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
+    if not plexpy.SYS_ENCODING or plexpy.SYS_ENCODING in ('ANSI_X3.4-1968',
+                                                          'US-ASCII', 'ASCII'):
         plexpy.SYS_ENCODING = 'UTF-8'
 
     # Set up and gather command line arguments
     parser = argparse.ArgumentParser(
-        description='A Python based monitoring and tracking tool for Plex Media Server.')
+        description=
+        'A Python based monitoring and tracking tool for Plex Media Server.')
 
-    parser.add_argument(
-        '-v', '--verbose', action='store_true', help='Increase console logging verbosity')
-    parser.add_argument(
-        '-q', '--quiet', action='store_true', help='Turn off console logging')
-    parser.add_argument(
-        '-d', '--daemon', action='store_true', help='Run as a daemon')
-    parser.add_argument(
-        '-p', '--port', type=int, help='Force Tautulli to run on a specified port')
-    parser.add_argument(
-        '--dev', action='store_true', help='Start Tautulli in the development environment')
+    parser.add_argument('-v',
+                        '--verbose',
+                        action='store_true',
+                        help='Increase console logging verbosity')
+    parser.add_argument('-q',
+                        '--quiet',
+                        action='store_true',
+                        help='Turn off console logging')
+    parser.add_argument('-d',
+                        '--daemon',
+                        action='store_true',
+                        help='Run as a daemon')
+    parser.add_argument('-p',
+                        '--port',
+                        type=int,
+                        help='Force Tautulli to run on a specified port')
+    parser.add_argument('--dev',
+                        action='store_true',
+                        help='Start Tautulli in the development environment')
     parser.add_argument(
         '--datadir', help='Specify a directory where to store your data files')
+    parser.add_argument('--config', help='Specify a config file to use')
+    parser.add_argument('--nolaunch',
+                        action='store_true',
+                        help='Prevent browser from launching on startup')
     parser.add_argument(
-        '--config', help='Specify a config file to use')
+        '--pidfile',
+        help='Create a pid file (only relevant when running as a daemon)')
     parser.add_argument(
-        '--nolaunch', action='store_true', help='Prevent browser from launching on startup')
-    parser.add_argument(
-        '--pidfile', help='Create a pid file (only relevant when running as a daemon)')
-    parser.add_argument(
-        '--nofork', action='store_true', help='Start Tautulli as a service, do not fork when restarting')
+        '--nofork',
+        action='store_true',
+        help='Start Tautulli as a service, do not fork when restarting')
 
     args = parser.parse_args()
 
@@ -106,7 +119,8 @@ def main():
         plexpy.QUIET = True
 
     # Do an intial setup of the logger.
-    logger.initLogger(console=not plexpy.QUIET, log_dir=False,
+    logger.initLogger(console=not plexpy.QUIET,
+                      log_dir=False,
                       verbose=plexpy.VERBOSE)
 
     try:
@@ -115,7 +129,8 @@ def main():
         logger.error("Could not determine system timezone: %s" % e)
         plexpy.SYS_TIMEZONE = pytz.UTC
 
-    plexpy.SYS_UTC_OFFSET = datetime.datetime.now(plexpy.SYS_TIMEZONE).strftime('%z')
+    plexpy.SYS_UTC_OFFSET = datetime.datetime.now(
+        plexpy.SYS_TIMEZONE).strftime('%z')
 
     if os.getenv('TAUTULLI_DOCKER', False) == 'True':
         plexpy.DOCKER = True
@@ -134,7 +149,9 @@ def main():
 
     if args.nofork:
         plexpy.NOFORK = True
-        logger.info("Tautulli is running as a service, it will not fork when restarted.")
+        logger.info(
+            "Tautulli is running as a service, it will not fork when restarted."
+        )
 
     if args.pidfile:
         plexpy.PIDFILE = str(args.pidfile)
@@ -188,13 +205,13 @@ def main():
         try:
             os.makedirs(plexpy.DATA_DIR)
         except OSError:
-            raise SystemExit(
-                'Could not create data directory: ' + plexpy.DATA_DIR + '. Exiting....')
+            raise SystemExit('Could not create data directory: ' +
+                             plexpy.DATA_DIR + '. Exiting....')
 
     # Make sure the DATA_DIR is writeable
     if not os.access(plexpy.DATA_DIR, os.W_OK):
-        raise SystemExit(
-            'Cannot write to the data directory: ' + plexpy.DATA_DIR + '. Exiting...')
+        raise SystemExit('Cannot write to the data directory: ' +
+                         plexpy.DATA_DIR + '. Exiting...')
 
     # Put the database in the DATA_DIR
     plexpy.DB_FILE = os.path.join(plexpy.DATA_DIR, database.FILENAME)
@@ -203,9 +220,11 @@ def main():
     if os.path.isfile(os.path.join(plexpy.DATA_DIR, 'plexpy.db')) and \
             not os.path.isfile(os.path.join(plexpy.DATA_DIR, plexpy.DB_FILE)):
         try:
-            os.rename(os.path.join(plexpy.DATA_DIR, 'plexpy.db'), plexpy.DB_FILE)
+            os.rename(os.path.join(plexpy.DATA_DIR, 'plexpy.db'),
+                      plexpy.DB_FILE)
         except OSError as e:
-            raise SystemExit("Unable to rename plexpy.db to tautulli.db: %s", e)
+            raise SystemExit("Unable to rename plexpy.db to tautulli.db: %s",
+                             e)
 
     if plexpy.DAEMON:
         plexpy.daemonize()
@@ -279,6 +298,7 @@ def main():
                 plexpy.shutdown(restart=True, update=True)
 
             plexpy.SIGNAL = None
+
 
 # Call main()
 if __name__ == "__main__":

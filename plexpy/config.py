@@ -34,6 +34,7 @@ def bool_int(value):
             value = 0
     return int(bool(value))
 
+
 FILENAME = "config.ini"
 
 _CONFIG_DEFINITIONS = {
@@ -628,7 +629,10 @@ _CONFIG_DEFINITIONS = {
     'WIN_SYS_TRAY': (int, 'General', 1)
 }
 
-_BLACKLIST_KEYS = ['_APITOKEN', '_TOKEN', '_KEY', '_SECRET', '_PASSWORD', '_APIKEY', '_ID', '_HOOK']
+_BLACKLIST_KEYS = [
+    '_APITOKEN', '_TOKEN', '_KEY', '_SECRET', '_PASSWORD', '_APIKEY', '_ID',
+    '_HOOK'
+]
 _WHITELIST_KEYS = ['HTTPS_KEY', 'UPDATE_SECTION_IDS']
 
 
@@ -636,9 +640,11 @@ def make_backup(cleanup=False, scheduler=False):
     """ Makes a backup of config file, removes all but the last 5 backups """
 
     if scheduler:
-        backup_file = 'config.backup-%s.sched.ini' % arrow.now().format('YYYYMMDDHHmmss')
+        backup_file = 'config.backup-%s.sched.ini' % arrow.now().format(
+            'YYYYMMDDHHmmss')
     else:
-        backup_file = 'config.backup-%s.ini' % arrow.now().format('YYYYMMDDHHmmss')
+        backup_file = 'config.backup-%s.ini' % arrow.now().format(
+            'YYYYMMDDHHmmss')
     backup_folder = plexpy.CONFIG.BACKUP_DIR
     backup_file_fp = os.path.join(backup_folder, backup_file)
 
@@ -653,19 +659,28 @@ def make_backup(cleanup=False, scheduler=False):
         now = time.time()
         # Delete all scheduled backup older than BACKUP_DAYS.
         for root, dirs, files in os.walk(backup_folder):
-            ini_files = [os.path.join(root, f) for f in files if f.endswith('.sched.ini')]
+            ini_files = [
+                os.path.join(root, f) for f in files
+                if f.endswith('.sched.ini')
+            ]
             for file_ in ini_files:
-                if os.stat(file_).st_mtime < now - plexpy.CONFIG.BACKUP_DAYS * 86400:
+                if os.stat(
+                        file_
+                ).st_mtime < now - plexpy.CONFIG.BACKUP_DAYS * 86400:
                     try:
                         os.remove(file_)
                     except OSError as e:
-                        logger.error(u"Tautulli Config :: Failed to delete %s from the backup folder: %s" % (file_, e))
+                        logger.error(
+                            u"Tautulli Config :: Failed to delete %s from the backup folder: %s"
+                            % (file_, e))
 
     if backup_file in os.listdir(backup_folder):
-        logger.debug(u"Tautulli Config :: Successfully backed up %s to %s" % (plexpy.CONFIG_FILE, backup_file))
+        logger.debug(u"Tautulli Config :: Successfully backed up %s to %s" %
+                     (plexpy.CONFIG_FILE, backup_file))
         return True
     else:
-        logger.error(u"Tautulli Config :: Failed to backup %s to %s" % (plexpy.CONFIG_FILE, backup_file))
+        logger.error(u"Tautulli Config :: Failed to backup %s to %s" %
+                     (plexpy.CONFIG_FILE, backup_file))
         return False
 
 
@@ -751,7 +766,8 @@ class Config(object):
         try:
             new_config.write()
         except IOError as e:
-            logger.error(u"Tautulli Config :: Error writing configuration file: %s", e)
+            logger.error(
+                u"Tautulli Config :: Error writing configuration file: %s", e)
 
         self._blacklist()
 
@@ -774,7 +790,8 @@ class Config(object):
             super(Config, self).__setattr__(name, value)
             return value
         else:
-            key, definition_type, section, ini_key, default = self._define(name)
+            key, definition_type, section, ini_key, default = self._define(
+                name)
             self._config[section][ini_key] = definition_type(value)
             return self._config[section][ini_key]
 
@@ -783,7 +800,8 @@ class Config(object):
         Given a big bunch of key value pairs, apply them to the ini.
         """
         for name, value in kwargs.items():
-            key, definition_type, section, ini_key, default = self._define(name)
+            key, definition_type, section, ini_key, default = self._define(
+                name)
             self._config[section][ini_key] = definition_type(value)
 
     def _upgrade(self):
@@ -810,7 +828,8 @@ class Config(object):
                     self.HOME_STATS_CARDS = home_stats_cards
             # Change home_library_cards to list
             if self.HOME_LIBRARY_CARDS:
-                home_library_cards = ''.join(self.HOME_LIBRARY_CARDS).split(', ')
+                home_library_cards = ''.join(
+                    self.HOME_LIBRARY_CARDS).split(', ')
                 if 'library_statistics' in home_library_cards:
                     home_library_cards.remove('library_statistics')
                     self.HOME_LIBRARY_CARDS = home_library_cards
@@ -818,21 +837,33 @@ class Config(object):
             self.CONFIG_VERSION = 2
 
         if self.CONFIG_VERSION == 2:
+
             def rep(s):
                 return s.replace('{progress}', '{progress_duration}')
 
-            self.NOTIFY_ON_START_SUBJECT_TEXT = rep(self.NOTIFY_ON_START_SUBJECT_TEXT)
-            self.NOTIFY_ON_START_BODY_TEXT = rep(self.NOTIFY_ON_START_BODY_TEXT)
-            self.NOTIFY_ON_STOP_SUBJECT_TEXT = rep(self.NOTIFY_ON_STOP_SUBJECT_TEXT)
+            self.NOTIFY_ON_START_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_START_SUBJECT_TEXT)
+            self.NOTIFY_ON_START_BODY_TEXT = rep(
+                self.NOTIFY_ON_START_BODY_TEXT)
+            self.NOTIFY_ON_STOP_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_STOP_SUBJECT_TEXT)
             self.NOTIFY_ON_STOP_BODY_TEXT = rep(self.NOTIFY_ON_STOP_BODY_TEXT)
-            self.NOTIFY_ON_PAUSE_SUBJECT_TEXT = rep(self.NOTIFY_ON_PAUSE_SUBJECT_TEXT)
-            self.NOTIFY_ON_PAUSE_BODY_TEXT = rep(self.NOTIFY_ON_PAUSE_BODY_TEXT)
-            self.NOTIFY_ON_RESUME_SUBJECT_TEXT = rep(self.NOTIFY_ON_RESUME_SUBJECT_TEXT)
-            self.NOTIFY_ON_RESUME_BODY_TEXT = rep(self.NOTIFY_ON_RESUME_BODY_TEXT)
-            self.NOTIFY_ON_BUFFER_SUBJECT_TEXT = rep(self.NOTIFY_ON_BUFFER_SUBJECT_TEXT)
-            self.NOTIFY_ON_BUFFER_BODY_TEXT = rep(self.NOTIFY_ON_BUFFER_BODY_TEXT)
-            self.NOTIFY_ON_WATCHED_SUBJECT_TEXT = rep(self.NOTIFY_ON_WATCHED_SUBJECT_TEXT)
-            self.NOTIFY_ON_WATCHED_BODY_TEXT = rep(self.NOTIFY_ON_WATCHED_BODY_TEXT)
+            self.NOTIFY_ON_PAUSE_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_PAUSE_SUBJECT_TEXT)
+            self.NOTIFY_ON_PAUSE_BODY_TEXT = rep(
+                self.NOTIFY_ON_PAUSE_BODY_TEXT)
+            self.NOTIFY_ON_RESUME_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_RESUME_SUBJECT_TEXT)
+            self.NOTIFY_ON_RESUME_BODY_TEXT = rep(
+                self.NOTIFY_ON_RESUME_BODY_TEXT)
+            self.NOTIFY_ON_BUFFER_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_BUFFER_SUBJECT_TEXT)
+            self.NOTIFY_ON_BUFFER_BODY_TEXT = rep(
+                self.NOTIFY_ON_BUFFER_BODY_TEXT)
+            self.NOTIFY_ON_WATCHED_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_WATCHED_SUBJECT_TEXT)
+            self.NOTIFY_ON_WATCHED_BODY_TEXT = rep(
+                self.NOTIFY_ON_WATCHED_BODY_TEXT)
             self.NOTIFY_SCRIPTS_ARGS_TEXT = rep(self.NOTIFY_SCRIPTS_ARGS_TEXT)
 
             self.CONFIG_VERSION = 3
@@ -844,11 +875,13 @@ class Config(object):
             self.CONFIG_VERSION = 4
 
         if self.CONFIG_VERSION == 4:
-            if not len(self.HOME_STATS_CARDS) and 'watch_stats' in self.HOME_SECTIONS:
+            if not len(self.HOME_STATS_CARDS
+                       ) and 'watch_stats' in self.HOME_SECTIONS:
                 home_sections = self.HOME_SECTIONS
                 home_sections.remove('watch_stats')
                 self.HOME_SECTIONS = home_sections
-            if not len(self.HOME_LIBRARY_CARDS) and 'library_stats' in self.HOME_SECTIONS:
+            if not len(self.HOME_LIBRARY_CARDS
+                       ) and 'library_stats' in self.HOME_SECTIONS:
                 home_sections = self.HOME_SECTIONS
                 home_sections.remove('library_stats')
                 self.HOME_SECTIONS = home_sections
@@ -867,24 +900,36 @@ class Config(object):
             self.CONFIG_VERSION = 7
 
         if self.CONFIG_VERSION == 7:
+
             def rep(s):
                 return s.replace('<tv>', '<episode>') \
                     .replace('</tv>', '</episode>') \
                     .replace('<music>', '<track>') \
                     .replace('</music>', '</track>')
 
-            self.NOTIFY_ON_START_SUBJECT_TEXT = rep(self.NOTIFY_ON_START_SUBJECT_TEXT)
-            self.NOTIFY_ON_START_BODY_TEXT = rep(self.NOTIFY_ON_START_BODY_TEXT)
-            self.NOTIFY_ON_STOP_SUBJECT_TEXT = rep(self.NOTIFY_ON_STOP_SUBJECT_TEXT)
+            self.NOTIFY_ON_START_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_START_SUBJECT_TEXT)
+            self.NOTIFY_ON_START_BODY_TEXT = rep(
+                self.NOTIFY_ON_START_BODY_TEXT)
+            self.NOTIFY_ON_STOP_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_STOP_SUBJECT_TEXT)
             self.NOTIFY_ON_STOP_BODY_TEXT = rep(self.NOTIFY_ON_STOP_BODY_TEXT)
-            self.NOTIFY_ON_PAUSE_SUBJECT_TEXT = rep(self.NOTIFY_ON_PAUSE_SUBJECT_TEXT)
-            self.NOTIFY_ON_PAUSE_BODY_TEXT = rep(self.NOTIFY_ON_PAUSE_BODY_TEXT)
-            self.NOTIFY_ON_RESUME_SUBJECT_TEXT = rep(self.NOTIFY_ON_RESUME_SUBJECT_TEXT)
-            self.NOTIFY_ON_RESUME_BODY_TEXT = rep(self.NOTIFY_ON_RESUME_BODY_TEXT)
-            self.NOTIFY_ON_BUFFER_SUBJECT_TEXT = rep(self.NOTIFY_ON_BUFFER_SUBJECT_TEXT)
-            self.NOTIFY_ON_BUFFER_BODY_TEXT = rep(self.NOTIFY_ON_BUFFER_BODY_TEXT)
-            self.NOTIFY_ON_WATCHED_SUBJECT_TEXT = rep(self.NOTIFY_ON_WATCHED_SUBJECT_TEXT)
-            self.NOTIFY_ON_WATCHED_BODY_TEXT = rep(self.NOTIFY_ON_WATCHED_BODY_TEXT)
+            self.NOTIFY_ON_PAUSE_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_PAUSE_SUBJECT_TEXT)
+            self.NOTIFY_ON_PAUSE_BODY_TEXT = rep(
+                self.NOTIFY_ON_PAUSE_BODY_TEXT)
+            self.NOTIFY_ON_RESUME_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_RESUME_SUBJECT_TEXT)
+            self.NOTIFY_ON_RESUME_BODY_TEXT = rep(
+                self.NOTIFY_ON_RESUME_BODY_TEXT)
+            self.NOTIFY_ON_BUFFER_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_BUFFER_SUBJECT_TEXT)
+            self.NOTIFY_ON_BUFFER_BODY_TEXT = rep(
+                self.NOTIFY_ON_BUFFER_BODY_TEXT)
+            self.NOTIFY_ON_WATCHED_SUBJECT_TEXT = rep(
+                self.NOTIFY_ON_WATCHED_SUBJECT_TEXT)
+            self.NOTIFY_ON_WATCHED_BODY_TEXT = rep(
+                self.NOTIFY_ON_WATCHED_BODY_TEXT)
             self.NOTIFY_SCRIPTS_ARGS_TEXT = rep(self.NOTIFY_SCRIPTS_ARGS_TEXT)
 
             self.NOTIFY_GROUP_RECENTLY_ADDED_PARENT = self.NOTIFY_GROUP_RECENTLY_ADDED
@@ -913,8 +958,8 @@ class Config(object):
             self.CONFIG_VERSION = 11
 
         if self.CONFIG_VERSION == 11:
-            self.ANON_REDIRECT = self.ANON_REDIRECT.replace('http://www.nullrefer.com/?',
-                                                            'https://www.nullrefer.com/?')
+            self.ANON_REDIRECT = self.ANON_REDIRECT.replace(
+                'http://www.nullrefer.com/?', 'https://www.nullrefer.com/?')
             self.CONFIG_VERSION = 12
 
         if self.CONFIG_VERSION == 12:

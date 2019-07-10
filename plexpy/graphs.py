@@ -23,19 +23,24 @@ import session
 
 
 class Graphs(object):
-
     def __init__(self):
         pass
 
-    def get_total_plays_per_day(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_per_day(self,
+                                time_range='30',
+                                y_axis='plays',
+                                user_id=None,
+                                grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
-        
+
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -44,7 +49,7 @@ class Graphs(object):
 
         group_by = 'reference_id' if grouping else 'id'
 
-        try:    
+        try:
             if y_axis == 'plays':
                 query = 'SELECT date(started, "unixepoch", "localtime") AS date_played, ' \
                         'SUM(CASE WHEN media_type = "episode" THEN 1 ELSE 0 END) AS tv_count, ' \
@@ -73,13 +78,18 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_day: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_day: %s."
+                % e)
             return None
 
         # create our date range as some days may not have any data
         # but we still want to display them
         base = datetime.date.today()
-        date_list = [base - datetime.timedelta(days=x) for x in range(0, int(time_range))]
+        date_list = [
+            base - datetime.timedelta(days=x)
+            for x in range(0, int(time_range))
+        ]
 
         categories = []
         series_1 = []
@@ -107,26 +117,31 @@ class Graphs(object):
             series_2.append(series_2_value)
             series_3.append(series_3_value)
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_per_dayofweek(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_per_dayofweek(self,
+                                      time_range='30',
+                                      y_axis='plays',
+                                      user_id=None,
+                                      grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -180,15 +195,21 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_dayofweek: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_dayofweek: %s."
+                % e)
             return None
 
         if plexpy.CONFIG.WEEK_START_MONDAY:
-            days_list = ['Monday', 'Tuesday', 'Wednesday',
-                         'Thursday', 'Friday', 'Saturday', 'Sunday']
+            days_list = [
+                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
+                'Saturday', 'Sunday'
+            ]
         else:
-            days_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday',
-                         'Thursday', 'Friday', 'Saturday']
+            days_list = [
+                'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+                'Friday', 'Saturday'
+            ]
 
         categories = []
         series_1 = []
@@ -215,26 +236,31 @@ class Graphs(object):
             series_2.append(series_2_value)
             series_3.append(series_3_value)
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_per_hourofday(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_per_hourofday(self,
+                                      time_range='30',
+                                      y_axis='plays',
+                                      user_id=None,
+                                      grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -272,13 +298,16 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_hourofday: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_hourofday: %s."
+                % e)
             return None
 
-        hours_list = ['00','01','02','03','04','05',
-                      '06','07','08','09','10','11',
-                      '12','13','14','15','16','17',
-                      '18','19','20','21','22','23']
+        hours_list = [
+            '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10',
+            '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21',
+            '22', '23'
+        ]
 
         categories = []
         series_1 = []
@@ -305,18 +334,21 @@ class Graphs(object):
             series_2.append(series_2_value)
             series_3.append(series_3_value)
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_per_month(self, time_range='12', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_per_month(self,
+                                  time_range='12',
+                                  y_axis='plays',
+                                  user_id=None,
+                                  grouping=None):
         import time as time
 
         if not time_range.isdigit():
@@ -325,8 +357,10 @@ class Graphs(object):
         monitor_db = database.MonitorDatabase()
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -364,14 +398,20 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_month: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_month: %s."
+                % e)
             return None
 
         # create our date range as some months may not have any data
         # but we still want to display them
         base = time.localtime()
-        month_range = [time.localtime(
-            time.mktime((base.tm_year, base.tm_mon - n, 1, 0, 0, 0, 0, 0, 0))) for n in range(int(time_range))]
+        month_range = [
+            time.localtime(
+                time.mktime(
+                    (base.tm_year, base.tm_mon - n, 1, 0, 0, 0, 0, 0, 0)))
+            for n in range(int(time_range))
+        ]
 
         categories = []
         series_1 = []
@@ -382,7 +422,8 @@ class Graphs(object):
             dt = datetime.datetime(*month_item[:6])
             date_string = dt.strftime('%Y-%m')
 
-            categories.append(dt.strftime('%b %Y').decode(plexpy.SYS_ENCODING, 'replace'))
+            categories.append(
+                dt.strftime('%b %Y').decode(plexpy.SYS_ENCODING, 'replace'))
             series_1_value = 0
             series_2_value = 0
             series_3_value = 0
@@ -401,26 +442,31 @@ class Graphs(object):
             series_2.append(series_2_value)
             series_3.append(series_3_value)
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_by_top_10_platforms(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_by_top_10_platforms(self,
+                                            time_range='30',
+                                            y_axis='plays',
+                                            user_id=None,
+                                            grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -461,7 +507,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_top_10_platforms: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_top_10_platforms: %s."
+                % e)
             return None
 
         categories = []
@@ -470,31 +518,38 @@ class Graphs(object):
         series_3 = []
 
         for item in result:
-            categories.append(common.PLATFORM_NAME_OVERRIDES.get(item['platform'], item['platform']))
+            categories.append(
+                common.PLATFORM_NAME_OVERRIDES.get(item['platform'],
+                                                   item['platform']))
             series_1.append(item['tv_count'])
             series_2.append(item['movie_count'])
             series_3.append(item['music_count'])
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_by_top_10_users(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_by_top_10_users(self,
+                                        time_range='30',
+                                        y_axis='plays',
+                                        user_id=None,
+                                        grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -543,7 +598,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_top_10_users: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_top_10_users: %s."
+                % e)
             return None
 
         categories = []
@@ -555,33 +612,39 @@ class Graphs(object):
 
         for item in result:
             if session_user_id:
-                categories.append(item['username'] if str(item['user_id']) == session_user_id else 'Plex User')
+                categories.append(item['username'] if str(item['user_id']) ==
+                                  session_user_id else 'Plex User')
             else:
                 categories.append(item['friendly_name'])
             series_1.append(item['tv_count'])
             series_2.append(item['movie_count'])
             series_3.append(item['music_count'])
 
-        series_1_output = {'name': 'TV',
-                           'data': series_1}
-        series_2_output = {'name': 'Movies',
-                           'data': series_2}
-        series_3_output = {'name': 'Music',
-                           'data': series_3}
+        series_1_output = {'name': 'TV', 'data': series_1}
+        series_2_output = {'name': 'Movies', 'data': series_2}
+        series_3_output = {'name': 'Music', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_per_stream_type(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_per_stream_type(self,
+                                        time_range='30',
+                                        y_axis='plays',
+                                        user_id=None,
+                                        grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -634,13 +697,18 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_stream_type: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_per_stream_type: %s."
+                % e)
             return None
 
         # create our date range as some days may not have any data
         # but we still want to display them
         base = datetime.date.today()
-        date_list = [base - datetime.timedelta(days=x) for x in range(0, int(time_range))]
+        date_list = [
+            base - datetime.timedelta(days=x)
+            for x in range(0, int(time_range))
+        ]
 
         categories = []
         series_1 = []
@@ -668,26 +736,31 @@ class Graphs(object):
             series_2.append(series_2_value)
             series_3.append(series_3_value)
 
-        series_1_output = {'name': 'Direct Play',
-                           'data': series_1}
-        series_2_output = {'name': 'Direct Stream',
-                           'data': series_2}
-        series_3_output = {'name': 'Transcode',
-                           'data': series_3}
+        series_1_output = {'name': 'Direct Play', 'data': series_1}
+        series_2_output = {'name': 'Direct Stream', 'data': series_2}
+        series_3_output = {'name': 'Transcode', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_by_source_resolution(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_by_source_resolution(self,
+                                             time_range='30',
+                                             y_axis='plays',
+                                             user_id=None,
+                                             grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -740,7 +813,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_source_resolution: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_source_resolution: %s."
+                % e)
             return None
 
         categories = []
@@ -758,26 +833,31 @@ class Graphs(object):
             series_2.append(item['ds_count'])
             series_3.append(item['tc_count'])
 
-        series_1_output = {'name': 'Direct Play',
-                           'data': series_1}
-        series_2_output = {'name': 'Direct Stream',
-                           'data': series_2}
-        series_3_output = {'name': 'Transcode',
-                           'data': series_3}
+        series_1_output = {'name': 'Direct Play', 'data': series_1}
+        series_2_output = {'name': 'Direct Stream', 'data': series_2}
+        series_3_output = {'name': 'Transcode', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_total_plays_by_stream_resolution(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_total_plays_by_stream_resolution(self,
+                                             time_range='30',
+                                             y_axis='plays',
+                                             user_id=None,
+                                             grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -854,7 +934,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_stream_resolution: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_total_plays_by_stream_resolution: %s."
+                % e)
             return None
 
         categories = []
@@ -872,26 +954,31 @@ class Graphs(object):
             series_2.append(item['ds_count'])
             series_3.append(item['tc_count'])
 
-        series_1_output = {'name': 'Direct Play',
-                           'data': series_1}
-        series_2_output = {'name': 'Direct Stream',
-                           'data': series_2}
-        series_3_output = {'name': 'Transcode',
-                           'data': series_3}
+        series_1_output = {'name': 'Direct Play', 'data': series_1}
+        series_2_output = {'name': 'Direct Stream', 'data': series_2}
+        series_3_output = {'name': 'Transcode', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
         return output
 
-    def get_stream_type_by_top_10_platforms(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_stream_type_by_top_10_platforms(self,
+                                            time_range='30',
+                                            y_axis='plays',
+                                            user_id=None,
+                                            grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -947,7 +1034,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_stream_type_by_top_10_platforms: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_stream_type_by_top_10_platforms: %s."
+                % e)
             return None
 
         categories = []
@@ -956,32 +1045,39 @@ class Graphs(object):
         series_3 = []
 
         for item in result:
-            categories.append(common.PLATFORM_NAME_OVERRIDES.get(item['platform'], item['platform']))
+            categories.append(
+                common.PLATFORM_NAME_OVERRIDES.get(item['platform'],
+                                                   item['platform']))
             series_1.append(item['dp_count'])
             series_2.append(item['ds_count'])
             series_3.append(item['tc_count'])
 
-        series_1_output = {'name': 'Direct Play',
-                           'data': series_1}
-        series_2_output = {'name': 'Direct Stream',
-                           'data': series_2}
-        series_3_output = {'name': 'Transcode',
-                           'data': series_3}
+        series_1_output = {'name': 'Direct Play', 'data': series_1}
+        series_2_output = {'name': 'Direct Stream', 'data': series_2}
+        series_3_output = {'name': 'Transcode', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
 
         return output
 
-    def get_stream_type_by_top_10_users(self, time_range='30', y_axis='plays', user_id=None, grouping=None):
+    def get_stream_type_by_top_10_users(self,
+                                        time_range='30',
+                                        y_axis='plays',
+                                        user_id=None,
+                                        grouping=None):
         monitor_db = database.MonitorDatabase()
 
         if not time_range.isdigit():
             time_range = '30'
 
         user_cond = ''
-        if session.get_session_user_id() and user_id and user_id != str(session.get_session_user_id()):
-            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id()
+        if session.get_session_user_id() and user_id and user_id != str(
+                session.get_session_user_id()):
+            user_cond = 'AND session_history.user_id = %s ' % session.get_session_user_id(
+            )
         elif user_id and user_id.isdigit():
             user_cond = 'AND session_history.user_id = %s ' % user_id
 
@@ -1045,7 +1141,9 @@ class Graphs(object):
 
                 result = monitor_db.select(query)
         except Exception as e:
-            logger.warn(u"Tautulli Graphs :: Unable to execute database query for get_stream_type_by_top_10_users: %s." % e)
+            logger.warn(
+                u"Tautulli Graphs :: Unable to execute database query for get_stream_type_by_top_10_users: %s."
+                % e)
             return None
 
         categories = []
@@ -1057,21 +1155,21 @@ class Graphs(object):
 
         for item in result:
             if session_user_id:
-                categories.append(item['username'] if str(item['user_id']) == session_user_id else 'Plex User')
+                categories.append(item['username'] if str(item['user_id']) ==
+                                  session_user_id else 'Plex User')
             else:
                 categories.append(item['friendly_name'])
             series_1.append(item['dp_count'])
             series_2.append(item['ds_count'])
             series_3.append(item['tc_count'])
 
-        series_1_output = {'name': 'Direct Play',
-                           'data': series_1}
-        series_2_output = {'name': 'Direct Stream',
-                           'data': series_2}
-        series_3_output = {'name': 'Transcode',
-                           'data': series_3}
+        series_1_output = {'name': 'Direct Play', 'data': series_1}
+        series_2_output = {'name': 'Direct Stream', 'data': series_2}
+        series_3_output = {'name': 'Transcode', 'data': series_3}
 
-        output = {'categories': categories,
-                  'series': [series_1_output, series_2_output, series_3_output]}
+        output = {
+            'categories': categories,
+            'series': [series_1_output, series_2_output, series_3_output]
+        }
 
         return output

@@ -32,56 +32,62 @@ import newsletter_handler
 import pmsconnect
 from notifiers import send_notification, EMAIL
 
-
-AGENT_IDS = {
-    'recently_added': 0
-}
+AGENT_IDS = {'recently_added': 0}
 
 
 def available_newsletter_agents():
-    agents = [
-        {
-            'label': 'Recently Added',
-            'name': 'recently_added',
-            'id': AGENT_IDS['recently_added']
-        }
-    ]
+    agents = [{
+        'label': 'Recently Added',
+        'name': 'recently_added',
+        'id': AGENT_IDS['recently_added']
+    }]
 
     return agents
 
 
 def available_notification_actions():
-    actions = [{'label': 'Schedule',
-                'name': 'on_cron',
-                'description': 'Trigger a notification on a certain schedule.',
-                'subject': 'Tautulli Newsletter',
-                'body': 'Tautulli Newsletter',
-                'message': '',
-                'icon': 'fa-calendar',
-                'media_types': ('newsletter',)
-                }
-               ]
+    actions = [{
+        'label': 'Schedule',
+        'name': 'on_cron',
+        'description': 'Trigger a notification on a certain schedule.',
+        'subject': 'Tautulli Newsletter',
+        'body': 'Tautulli Newsletter',
+        'message': '',
+        'icon': 'fa-calendar',
+        'media_types': ('newsletter', )
+    }]
 
     return actions
 
 
-def get_agent_class(newsletter_id=None, newsletter_id_name=None, agent_id=None, config=None, email_config=None,
-                    start_date=None, end_date=None, subject=None, body=None, message=None,
-                    email_msg_id=None, email_reply_msg_id=None):
+def get_agent_class(newsletter_id=None,
+                    newsletter_id_name=None,
+                    agent_id=None,
+                    config=None,
+                    email_config=None,
+                    start_date=None,
+                    end_date=None,
+                    subject=None,
+                    body=None,
+                    message=None,
+                    email_msg_id=None,
+                    email_reply_msg_id=None):
     if str(agent_id).isdigit():
         agent_id = int(agent_id)
 
-        kwargs = {'newsletter_id': newsletter_id,
-                  'newsletter_id_name': newsletter_id_name,
-                  'config': config,
-                  'email_config': email_config,
-                  'start_date': start_date,
-                  'end_date': end_date,
-                  'subject': subject,
-                  'body': body,
-                  'message': message,
-                  'email_msg_id': email_msg_id,
-                  'email_reply_msg_id': email_reply_msg_id}
+        kwargs = {
+            'newsletter_id': newsletter_id,
+            'newsletter_id_name': newsletter_id_name,
+            'config': config,
+            'email_config': email_config,
+            'start_date': start_date,
+            'end_date': end_date,
+            'subject': subject,
+            'body': body,
+            'message': message,
+            'email_msg_id': email_msg_id,
+            'email_reply_msg_id': email_reply_msg_id
+        }
 
         if agent_id == 0:
             return RecentlyAdded(**kwargs)
@@ -92,7 +98,8 @@ def get_agent_class(newsletter_id=None, newsletter_id_name=None, agent_id=None, 
 
 
 def get_newsletter_agents():
-    return tuple(a['name'] for a in sorted(available_newsletter_agents(), key=lambda k: k['label']))
+    return tuple(a['name'] for a in sorted(available_newsletter_agents(),
+                                           key=lambda k: k['label']))
 
 
 def get_newsletters(newsletter_id=None):
@@ -108,7 +115,9 @@ def get_newsletters(newsletter_id=None):
 
     db = database.MonitorDatabase()
     result = db.select('SELECT id, agent_id, agent_name, agent_label, '
-                       'friendly_name, cron, active FROM newsletters %s' % where, args=args)
+                       'friendly_name, cron, active FROM newsletters %s' %
+                       where,
+                       args=args)
 
     return result
 
@@ -117,9 +126,11 @@ def delete_newsletter(newsletter_id=None):
     db = database.MonitorDatabase()
 
     if str(newsletter_id).isdigit():
-        logger.debug(u"Tautulli Newsletters :: Deleting newsletter_id %s from the database."
-                     % newsletter_id)
-        result = db.action('DELETE FROM newsletters WHERE id = ?', args=[newsletter_id])
+        logger.debug(
+            u"Tautulli Newsletters :: Deleting newsletter_id %s from the database."
+            % newsletter_id)
+        result = db.action('DELETE FROM newsletters WHERE id = ?',
+                           args=[newsletter_id])
         return True
     else:
         return False
@@ -129,12 +140,14 @@ def get_newsletter_config(newsletter_id=None, mask_passwords=False):
     if str(newsletter_id).isdigit():
         newsletter_id = int(newsletter_id)
     else:
-        logger.error(u"Tautulli Newsletters :: Unable to retrieve newsletter config: invalid newsletter_id %s."
-                     % newsletter_id)
+        logger.error(
+            u"Tautulli Newsletters :: Unable to retrieve newsletter config: invalid newsletter_id %s."
+            % newsletter_id)
         return None
 
     db = database.MonitorDatabase()
-    result = db.select_single('SELECT * FROM newsletters WHERE id = ?', args=[newsletter_id])
+    result = db.select_single('SELECT * FROM newsletters WHERE id = ?',
+                              args=[newsletter_id])
 
     if not result:
         return None
@@ -145,24 +158,35 @@ def get_newsletter_config(newsletter_id=None, mask_passwords=False):
         subject = result.pop('subject')
         body = result.pop('body')
         message = result.pop('message')
-        newsletter_agent = get_agent_class(newsletter_id=newsletter_id, newsletter_id_name=result['id_name'],
-                                           agent_id=result['agent_id'],
-                                           config=config, email_config=email_config,
-                                           subject=subject, body=body, message=message)
+        newsletter_agent = get_agent_class(
+            newsletter_id=newsletter_id,
+            newsletter_id_name=result['id_name'],
+            agent_id=result['agent_id'],
+            config=config,
+            email_config=email_config,
+            subject=subject,
+            body=body,
+            message=message)
     except Exception as e:
-        logger.error(u"Tautulli Newsletters :: Failed to get newsletter config options: %s." % e)
+        logger.error(
+            u"Tautulli Newsletters :: Failed to get newsletter config options: %s."
+            % e)
         return
 
     if mask_passwords:
-        newsletter_agent.email_config = helpers.mask_config_passwords(newsletter_agent.email_config)
+        newsletter_agent.email_config = helpers.mask_config_passwords(
+            newsletter_agent.email_config)
 
     result['subject'] = newsletter_agent.subject
     result['body'] = newsletter_agent.body
     result['message'] = newsletter_agent.message
     result['config'] = newsletter_agent.config
     result['email_config'] = newsletter_agent.email_config
-    result['config_options'] = newsletter_agent.return_config_options(mask_passwords=mask_passwords)
-    result['email_config_options'] = newsletter_agent.return_email_config_options(mask_passwords=mask_passwords)
+    result['config_options'] = newsletter_agent.return_config_options(
+        mask_passwords=mask_passwords)
+    result[
+        'email_config_options'] = newsletter_agent.return_email_config_options(
+            mask_passwords=mask_passwords)
 
     return result
 
@@ -171,42 +195,49 @@ def add_newsletter_config(agent_id=None, **kwargs):
     if str(agent_id).isdigit():
         agent_id = int(agent_id)
     else:
-        logger.error(u"Tautulli Newsletters :: Unable to add new newsletter: invalid agent_id %s."
-                     % agent_id)
+        logger.error(
+            u"Tautulli Newsletters :: Unable to add new newsletter: invalid agent_id %s."
+            % agent_id)
         return False
 
-    agent = next((a for a in available_newsletter_agents() if a['id'] == agent_id), None)
+    agent = next(
+        (a for a in available_newsletter_agents() if a['id'] == agent_id),
+        None)
 
     if not agent:
-        logger.error(u"Tautulli Newsletters :: Unable to retrieve new newsletter agent: invalid agent_id %s."
-                     % agent_id)
+        logger.error(
+            u"Tautulli Newsletters :: Unable to retrieve new newsletter agent: invalid agent_id %s."
+            % agent_id)
         return False
 
     agent_class = get_agent_class(agent_id=agent['id'])
 
     keys = {'id': None}
-    values = {'agent_id': agent['id'],
-              'agent_name': agent['name'],
-              'agent_label': agent['label'],
-              'id_name': '',
-              'friendly_name': '',
-              'newsletter_config': json.dumps(agent_class.config),
-              'email_config': json.dumps(agent_class.email_config),
-              'subject': agent_class.subject,
-              'body': agent_class.body,
-              'message': agent_class.message
-              }
+    values = {
+        'agent_id': agent['id'],
+        'agent_name': agent['name'],
+        'agent_label': agent['label'],
+        'id_name': '',
+        'friendly_name': '',
+        'newsletter_config': json.dumps(agent_class.config),
+        'email_config': json.dumps(agent_class.email_config),
+        'subject': agent_class.subject,
+        'body': agent_class.body,
+        'message': agent_class.message
+    }
 
     db = database.MonitorDatabase()
     try:
         db.upsert(table_name='newsletters', key_dict=keys, value_dict=values)
         newsletter_id = db.last_insert_id()
-        logger.info(u"Tautulli Newsletters :: Added new newsletter agent: %s (newsletter_id %s)."
-                    % (agent['label'], newsletter_id))
+        logger.info(
+            u"Tautulli Newsletters :: Added new newsletter agent: %s (newsletter_id %s)."
+            % (agent['label'], newsletter_id))
         blacklist_logger()
         return newsletter_id
     except Exception as e:
-        logger.warn(u"Tautulli Newsletters :: Unable to add newsletter agent: %s." % e)
+        logger.warn(
+            u"Tautulli Newsletters :: Unable to add newsletter agent: %s." % e)
         return False
 
 
@@ -214,30 +245,39 @@ def set_newsletter_config(newsletter_id=None, agent_id=None, **kwargs):
     if str(agent_id).isdigit():
         agent_id = int(agent_id)
     else:
-        logger.error(u"Tautulli Newsletters :: Unable to set existing newsletter: invalid agent_id %s."
-                     % agent_id)
+        logger.error(
+            u"Tautulli Newsletters :: Unable to set existing newsletter: invalid agent_id %s."
+            % agent_id)
         return False
 
-    agent = next((a for a in available_newsletter_agents() if a['id'] == agent_id), None)
+    agent = next(
+        (a for a in available_newsletter_agents() if a['id'] == agent_id),
+        None)
 
     if not agent:
-        logger.error(u"Tautulli Newsletters :: Unable to retrieve existing newsletter agent: invalid agent_id %s."
-                     % agent_id)
+        logger.error(
+            u"Tautulli Newsletters :: Unable to retrieve existing newsletter agent: invalid agent_id %s."
+            % agent_id)
         return False
 
     config_prefix = 'newsletter_config_'
     email_config_prefix = 'newsletter_email_'
 
-    newsletter_config = {k[len(config_prefix):]: kwargs.pop(k)
-                         for k in kwargs.keys() if k.startswith(config_prefix)}
-    email_config = {k[len(email_config_prefix):]: kwargs.pop(k)
-                    for k in kwargs.keys() if k.startswith(email_config_prefix)}
+    newsletter_config = {
+        k[len(config_prefix):]: kwargs.pop(k)
+        for k in kwargs.keys() if k.startswith(config_prefix)
+    }
+    email_config = {
+        k[len(email_config_prefix):]: kwargs.pop(k)
+        for k in kwargs.keys() if k.startswith(email_config_prefix)
+    }
 
     for cfg, val in email_config.iteritems():
         # Check for a password config keys and a blank password from the HTML form
         if 'password' in cfg and val == '    ':
             # Get the previous password so we don't overwrite it with a blank value
-            old_newsletter_config = get_newsletter_config(newsletter_id=newsletter_id)
+            old_newsletter_config = get_newsletter_config(
+                newsletter_id=newsletter_id)
             email_config[cfg] = old_newsletter_config['email_config'][cfg]
 
     subject = kwargs.pop('subject')
@@ -245,38 +285,50 @@ def set_newsletter_config(newsletter_id=None, agent_id=None, **kwargs):
     message = kwargs.pop('message')
 
     agent_class = get_agent_class(agent_id=agent['id'],
-                                  config=newsletter_config, email_config=email_config,
-                                  subject=subject, body=body, message=message)
+                                  config=newsletter_config,
+                                  email_config=email_config,
+                                  subject=subject,
+                                  body=body,
+                                  message=message)
 
     keys = {'id': newsletter_id}
-    values = {'agent_id': agent['id'],
-              'agent_name': agent['name'],
-              'agent_label': agent['label'],
-              'id_name': kwargs.get('id_name', ''),
-              'friendly_name': kwargs.get('friendly_name', ''),
-              'newsletter_config': json.dumps(agent_class.config),
-              'email_config': json.dumps(agent_class.email_config),
-              'subject': agent_class.subject,
-              'body': agent_class.body,
-              'message': agent_class.message,
-              'cron': kwargs.get('cron'),
-              'active': kwargs.get('active')
-              }
+    values = {
+        'agent_id': agent['id'],
+        'agent_name': agent['name'],
+        'agent_label': agent['label'],
+        'id_name': kwargs.get('id_name', ''),
+        'friendly_name': kwargs.get('friendly_name', ''),
+        'newsletter_config': json.dumps(agent_class.config),
+        'email_config': json.dumps(agent_class.email_config),
+        'subject': agent_class.subject,
+        'body': agent_class.body,
+        'message': agent_class.message,
+        'cron': kwargs.get('cron'),
+        'active': kwargs.get('active')
+    }
 
     db = database.MonitorDatabase()
     try:
         db.upsert(table_name='newsletters', key_dict=keys, value_dict=values)
-        logger.info(u"Tautulli Newsletters :: Updated newsletter agent: %s (newsletter_id %s)."
-                    % (agent['label'], newsletter_id))
+        logger.info(
+            u"Tautulli Newsletters :: Updated newsletter agent: %s (newsletter_id %s)."
+            % (agent['label'], newsletter_id))
         newsletter_handler.schedule_newsletters(newsletter_id=newsletter_id)
         blacklist_logger()
         return True
     except Exception as e:
-        logger.warn(u"Tautulli Newsletters :: Unable to update newsletter agent: %s." % e)
+        logger.warn(
+            u"Tautulli Newsletters :: Unable to update newsletter agent: %s." %
+            e)
         return False
 
 
-def send_newsletter(newsletter_id=None, subject=None, body=None, message=None, newsletter_log_id=None, **kwargs):
+def send_newsletter(newsletter_id=None,
+                    subject=None,
+                    body=None,
+                    message=None,
+                    newsletter_log_id=None,
+                    **kwargs):
     newsletter_config = get_newsletter_config(newsletter_id=newsletter_id)
     if newsletter_config:
         agent = get_agent_class(agent_id=newsletter_config['agent_id'],
@@ -287,12 +339,15 @@ def send_newsletter(newsletter_id=None, subject=None, body=None, message=None, n
                                 messsage=message)
         return agent.send()
     else:
-        logger.debug(u"Tautulli Newsletters :: Notification requested but no newsletter_id received.")
+        logger.debug(
+            u"Tautulli Newsletters :: Notification requested but no newsletter_id received."
+        )
 
 
 def blacklist_logger():
     db = database.MonitorDatabase()
-    notifiers = db.select('SELECT newsletter_config, email_config FROM newsletters')
+    notifiers = db.select(
+        'SELECT newsletter_config, email_config FROM newsletters')
 
     for n in notifiers:
         config = json.loads(n['newsletter_config'] or '{}')
@@ -306,12 +361,14 @@ def serve_template(templatename, **kwargs):
         template_dir = plexpy.CONFIG.NEWSLETTER_CUSTOM_DIR
     else:
         interface_dir = os.path.join(str(plexpy.PROG_DIR), 'data/interfaces/')
-        template_dir = os.path.join(str(interface_dir), plexpy.CONFIG.NEWSLETTER_TEMPLATES)
+        template_dir = os.path.join(str(interface_dir),
+                                    plexpy.CONFIG.NEWSLETTER_TEMPLATES)
 
         if not plexpy.CONFIG.NEWSLETTER_INLINE_STYLES:
             templatename = templatename.replace('.html', '.internal.html')
 
-    _hplookup = TemplateLookup(directories=[template_dir], default_filters=['unicode', 'h'])
+    _hplookup = TemplateLookup(directories=[template_dir],
+                               default_filters=['unicode', 'h'])
 
     try:
         template = _hplookup.get_template(templatename)
@@ -328,7 +385,8 @@ def generate_newsletter_uuid():
     while not uuid or uuid_exists:
         uuid = plexpy.generate_uuid()[:8]
         result = db.select_single(
-            'SELECT EXISTS(SELECT uuid FROM newsletter_log WHERE uuid = ?) as uuid_exists', [uuid])
+            'SELECT EXISTS(SELECT uuid FROM newsletter_log WHERE uuid = ?) as uuid_exists',
+            [uuid])
         uuid_exists = result['uuid_exists']
 
     return uuid
@@ -336,14 +394,16 @@ def generate_newsletter_uuid():
 
 class Newsletter(object):
     NAME = ''
-    _DEFAULT_CONFIG = {'custom_cron': 0,
-                       'time_frame': 7,
-                       'time_frame_units': 'days',
-                       'formatted': 1,
-                       'threaded': 0,
-                       'notifier_id': 0,
-                       'filename': '',
-                       'save_only': 0}
+    _DEFAULT_CONFIG = {
+        'custom_cron': 0,
+        'time_frame': 7,
+        'time_frame_units': 'days',
+        'formatted': 1,
+        'threaded': 0,
+        'notifier_id': 0,
+        'filename': '',
+        'save_only': 0
+    }
     _DEFAULT_EMAIL_CONFIG = EMAIL().return_default_config()
     _DEFAULT_EMAIL_CONFIG['from_name'] = 'Tautulli Newsletter'
     _DEFAULT_EMAIL_CONFIG['notifier_id'] = 0
@@ -353,11 +413,22 @@ class Newsletter(object):
     _DEFAULT_FILENAME = 'newsletter_{newsletter_uuid}.html'
     _TEMPLATE = ''
 
-    def __init__(self, newsletter_id=None, newsletter_id_name=None, config=None, email_config=None,
-                 start_date=None, end_date=None, subject=None, body=None, message=None,
-                 email_msg_id=None, email_reply_msg_id=None):
-        self.config = self.set_config(config=config, default=self._DEFAULT_CONFIG)
-        self.email_config = self.set_config(config=email_config, default=self._DEFAULT_EMAIL_CONFIG)
+    def __init__(self,
+                 newsletter_id=None,
+                 newsletter_id_name=None,
+                 config=None,
+                 email_config=None,
+                 start_date=None,
+                 end_date=None,
+                 subject=None,
+                 body=None,
+                 message=None,
+                 email_msg_id=None,
+                 email_reply_msg_id=None):
+        self.config = self.set_config(config=config,
+                                      default=self._DEFAULT_CONFIG)
+        self.email_config = self.set_config(config=email_config,
+                                            default=self._DEFAULT_EMAIL_CONFIG)
         self.uuid = generate_newsletter_uuid()
 
         self.email_msg_id = email_msg_id
@@ -370,7 +441,9 @@ class Newsletter(object):
 
         if end_date:
             try:
-                self.end_date = arrow.get(end_date, 'YYYY-MM-DD', tzinfo='local').ceil('day')
+                self.end_date = arrow.get(end_date,
+                                          'YYYY-MM-DD',
+                                          tzinfo='local').ceil('day')
             except ValueError:
                 pass
 
@@ -379,15 +452,19 @@ class Newsletter(object):
 
         if start_date:
             try:
-                self.start_date = arrow.get(start_date, 'YYYY-MM-DD', tzinfo='local').floor('day')
+                self.start_date = arrow.get(start_date,
+                                            'YYYY-MM-DD',
+                                            tzinfo='local').floor('day')
             except ValueError:
                 pass
 
         if self.start_date is None:
             if self.config['time_frame_units'] == 'days':
-                self.start_date = self.end_date.shift(days=-self.config['time_frame']+1).floor('day')
+                self.start_date = self.end_date.shift(
+                    days=-self.config['time_frame'] + 1).floor('day')
             else:
-                self.start_date = self.end_date.shift(hours=-self.config['time_frame']).floor('hour')
+                self.start_date = self.end_date.shift(
+                    hours=-self.config['time_frame']).floor('hour')
 
         self.end_time = self.end_date.timestamp
         self.start_time = self.start_date.timestamp
@@ -401,7 +478,8 @@ class Newsletter(object):
         if not self.filename.endswith('.html'):
             self.filename += '.html'
 
-        self.subject_formatted, self.body_formatted, self.message_formatted = self.build_text()
+        self.subject_formatted, self.body_formatted, self.message_formatted = self.build_text(
+        )
         self.filename_formatted = self.build_filename()
 
         self.data = {}
@@ -444,9 +522,11 @@ class Newsletter(object):
 
         self.retrieve_data()
 
-        return {'title': self.NAME,
-                'parameters': self.parameters,
-                'data': self.data}
+        return {
+            'title': self.NAME,
+            'parameters': self.parameters,
+            'data': self.data
+        }
 
     def generate_newsletter(self, preview=False):
         if preview:
@@ -462,8 +542,7 @@ class Newsletter(object):
             message=self.message_formatted,
             parameters=self.parameters,
             data=self.data,
-            preview=self.is_preview
-        )
+            preview=self.is_preview)
 
         if self.template_error:
             return newsletter_rendered
@@ -477,14 +556,16 @@ class Newsletter(object):
             )
 
         else:
-            msg = ('<div style="text-align: center;padding-top: 100px;padding-bottom: 100px;">'
-                   '<p style="font-family: \'Open Sans\', Helvetica, Arial, sans-serif;color: #282A2D;'
-                   'font-size: 18px;line-height: 30px;">'
-                   'The Tautulli newsletter footer was removed from the newsletter template.<br>'
-                   'Please leave the footer in place as it is unobtrusive and supports '
-                   '<a href="https://tautulli.com" target="_blank">Tautulli</a>.<br>Thank you.'
-                   '</p></div>')
-            newsletter_rendered = re.sub(r'(<body.*?>)', r'\1' + msg, newsletter_rendered)
+            msg = (
+                '<div style="text-align: center;padding-top: 100px;padding-bottom: 100px;">'
+                '<p style="font-family: \'Open Sans\', Helvetica, Arial, sans-serif;color: #282A2D;'
+                'font-size: 18px;line-height: 30px;">'
+                'The Tautulli newsletter footer was removed from the newsletter template.<br>'
+                'Please leave the footer in place as it is unobtrusive and supports '
+                '<a href="https://tautulli.com" target="_blank">Tautulli</a>.<br>Thank you.'
+                '</p></div>')
+            newsletter_rendered = re.sub(r'(<body.*?>)', r'\1' + msg,
+                                         newsletter_rendered)
 
         return newsletter_rendered
 
@@ -492,11 +573,15 @@ class Newsletter(object):
         self.newsletter = self.generate_newsletter()
 
         if self.template_error:
-            logger.error(u"Tautulli Newsletters :: %s newsletter failed to render template. Newsletter not sent." % self.NAME)
+            logger.error(
+                u"Tautulli Newsletters :: %s newsletter failed to render template. Newsletter not sent."
+                % self.NAME)
             return False
 
         if not self._has_data():
-            logger.warn(u"Tautulli Newsletters :: %s newsletter has no data. Newsletter not sent." % self.NAME)
+            logger.warn(
+                u"Tautulli Newsletters :: %s newsletter has no data. Newsletter not sent."
+                % self.NAME)
             return False
 
         self._save()
@@ -508,7 +593,8 @@ class Newsletter(object):
 
     def _save(self):
         newsletter_file = self.filename_formatted
-        newsletter_folder = plexpy.CONFIG.NEWSLETTER_DIR or os.path.join(plexpy.DATA_DIR, 'newsletters')
+        newsletter_folder = plexpy.CONFIG.NEWSLETTER_DIR or os.path.join(
+            plexpy.DATA_DIR, 'newsletters')
         newsletter_file_fp = os.path.join(newsletter_folder, newsletter_file)
 
         # In case the user has deleted it manually
@@ -522,20 +608,25 @@ class Newsletter(object):
                         n_file.write(line + '\r\n')
                         #n_file.write(line.strip())
 
-            logger.info(u"Tautulli Newsletters :: %s newsletter saved to '%s'" % (self.NAME, newsletter_file))
+            logger.info(
+                u"Tautulli Newsletters :: %s newsletter saved to '%s'" %
+                (self.NAME, newsletter_file))
         except OSError as e:
-            logger.error(u"Tautulli Newsletters :: Failed to save %s newsletter to '%s': %s"
-                         % (self.NAME, newsletter_file, e))
+            logger.error(
+                u"Tautulli Newsletters :: Failed to save %s newsletter to '%s': %s"
+                % (self.NAME, newsletter_file, e))
 
     def _send(self):
         if self.config['formatted']:
-            newsletter_stripped = ''.join(l.strip() for l in self.newsletter.splitlines())
+            newsletter_stripped = ''.join(
+                l.strip() for l in self.newsletter.splitlines())
 
             plaintext = 'HTML email support is required to view the newsletter.\n'
             if plexpy.CONFIG.NEWSLETTER_SELF_HOSTED and plexpy.CONFIG.HTTP_BASE_URL:
                 plaintext += self._DEFAULT_BODY.format(**self.parameters)
 
-            email_reply_msg_id = self.email_reply_msg_id if self.config['threaded'] else None
+            email_reply_msg_id = self.email_reply_msg_id if self.config[
+                'threaded'] else None
 
             if self.email_config['notifier_id']:
                 return send_notification(
@@ -544,24 +635,19 @@ class Newsletter(object):
                     body=newsletter_stripped,
                     plaintext=plaintext,
                     msg_id=self.email_msg_id,
-                    reply_msg_id=email_reply_msg_id
-                )
+                    reply_msg_id=email_reply_msg_id)
 
             else:
                 email = EMAIL(config=self.email_config)
-                return email.notify(
-                    subject=self.subject_formatted,
-                    body=newsletter_stripped,
-                    plaintext=plaintext,
-                    msg_id=self.email_msg_id,
-                    reply_msg_id=email_reply_msg_id
-                )
+                return email.notify(subject=self.subject_formatted,
+                                    body=newsletter_stripped,
+                                    plaintext=plaintext,
+                                    msg_id=self.email_msg_id,
+                                    reply_msg_id=email_reply_msg_id)
         elif self.config['notifier_id']:
-            return send_notification(
-                    notifier_id=self.config['notifier_id'],
-                    subject=self.subject_formatted,
-                    body=self.body_formatted
-                )
+            return send_notification(notifier_id=self.config['notifier_id'],
+                                     subject=self.subject_formatted,
+                                     body=self.body_formatted)
 
     def build_params(self):
         parameters = self._build_params()
@@ -592,7 +678,8 @@ class Newsletter(object):
             'newsletter_time_frame': self.config['time_frame'],
             'newsletter_time_frame_units': self.config['time_frame_units'],
             'newsletter_url': base_url + self.uuid,
-            'newsletter_static_url': base_url + 'id/' + self.newsletter_id_name,
+            'newsletter_static_url':
+            base_url + 'id/' + self.newsletter_id_name,
             'newsletter_uuid': self.uuid,
             'newsletter_id': self.newsletter_id,
             'newsletter_id_name': self.newsletter_id_name,
@@ -606,36 +693,45 @@ class Newsletter(object):
         custom_formatter = CustomFormatter()
 
         try:
-            subject = custom_formatter.format(unicode(self.subject), **self.parameters)
+            subject = custom_formatter.format(unicode(self.subject),
+                                              **self.parameters)
         except LookupError as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter subject. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter subject. Using fallback."
+                % e)
             subject = unicode(self._DEFAULT_SUBJECT).format(**self.parameters)
         except Exception as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse custom newsletter subject: %s. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse custom newsletter subject: %s. Using fallback."
+                % e)
             subject = unicode(self._DEFAULT_SUBJECT).format(**self.parameters)
 
         try:
-            body = custom_formatter.format(unicode(self.body), **self.parameters)
+            body = custom_formatter.format(unicode(self.body),
+                                           **self.parameters)
         except LookupError as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter body. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter body. Using fallback."
+                % e)
             body = unicode(self._DEFAULT_BODY).format(**self.parameters)
         except Exception as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse custom newsletter body: %s. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse custom newsletter body: %s. Using fallback."
+                % e)
             body = unicode(self._DEFAULT_BODY).format(**self.parameters)
 
         try:
-            message = custom_formatter.format(unicode(self.message), **self.parameters)
+            message = custom_formatter.format(unicode(self.message),
+                                              **self.parameters)
         except LookupError as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter message. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter message. Using fallback."
+                % e)
             message = unicode(self._DEFAULT_MESSAGE).format(**self.parameters)
         except Exception as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse custom newsletter message: %s. Using fallback." % e)
+                u"Tautulli Newsletter :: Unable to parse custom newsletter message: %s. Using fallback."
+                % e)
             message = unicode(self._DEFAULT_MESSAGE).format(**self.parameters)
 
         return subject, body, message
@@ -645,15 +741,20 @@ class Newsletter(object):
         custom_formatter = CustomFormatter()
 
         try:
-            filename = custom_formatter.format(unicode(self.filename), **self.parameters)
+            filename = custom_formatter.format(unicode(self.filename),
+                                               **self.parameters)
         except LookupError as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter filename. Using fallback." % e)
-            filename = unicode(self._DEFAULT_FILENAME).format(**self.parameters)
+                u"Tautulli Newsletter :: Unable to parse parameter %s in newsletter filename. Using fallback."
+                % e)
+            filename = unicode(
+                self._DEFAULT_FILENAME).format(**self.parameters)
         except Exception as e:
             logger.error(
-                u"Tautulli Newsletter :: Unable to parse custom newsletter subject: %s. Using fallback." % e)
-            filename = unicode(self._DEFAULT_FILENAME).format(**self.parameters)
+                u"Tautulli Newsletter :: Unable to parse custom newsletter subject: %s. Using fallback."
+                % e)
+            filename = unicode(
+                self._DEFAULT_FILENAME).format(**self.parameters)
 
         return filename
 
@@ -671,7 +772,8 @@ class Newsletter(object):
         return config_options
 
     def return_email_config_options(self, mask_passwords=False):
-        config_options = EMAIL(self.email_config).return_config_options(mask_passwords=mask_passwords)
+        config_options = EMAIL(self.email_config).return_config_options(
+            mask_passwords=mask_passwords)
         for c in config_options:
             c['name'] = 'newsletter_' + c['name']
         return config_options
@@ -699,9 +801,12 @@ class RecentlyAdded(Newsletter):
         start = 0
 
         while not done:
-            recent_items = pms_connect.get_recently_added_details(start=str(start), count='10', media_type=media_type)
-            filtered_items = [i for i in recent_items['recently_added']
-                              if self.start_time < helpers.cast_to_int(i['added_at']) < self.end_time]
+            recent_items = pms_connect.get_recently_added_details(
+                start=str(start), count='10', media_type=media_type)
+            filtered_items = [
+                i for i in recent_items['recently_added'] if self.start_time <
+                helpers.cast_to_int(i['added_at']) < self.end_time
+            ]
             if len(filtered_items) < 10:
                 done = True
             else:
@@ -738,23 +843,34 @@ class RecentlyAdded(Newsletter):
                 if show_rating_key in show_rating_keys:
                     continue
 
-                show_metadata = pms_connect.get_metadata_details(show_rating_key, media_info=False)
-                children = pms_connect.get_item_children(show_rating_key, get_grandchildren=True)
-                filtered_children = [i for i in children['children_list']
-                                     if self.start_time < helpers.cast_to_int(i['added_at']) < self.end_time]
-                filtered_children.sort(key=lambda x: int(x['parent_media_index']))
+                show_metadata = pms_connect.get_metadata_details(
+                    show_rating_key, media_info=False)
+                children = pms_connect.get_item_children(
+                    show_rating_key, get_grandchildren=True)
+                filtered_children = [
+                    i for i in children['children_list'] if self.start_time <
+                    helpers.cast_to_int(i['added_at']) < self.end_time
+                ]
+                filtered_children.sort(
+                    key=lambda x: int(x['parent_media_index']))
 
                 seasons = []
-                for k, v in groupby(filtered_children, key=lambda x: x['parent_media_index']):
+                for k, v in groupby(filtered_children,
+                                    key=lambda x: x['parent_media_index']):
                     episodes = list(v)
-                    num, num00 = format_group_index([helpers.cast_to_int(d['media_index']) for d in episodes])
+                    num, num00 = format_group_index([
+                        helpers.cast_to_int(d['media_index']) for d in episodes
+                    ])
 
-                    seasons.append({'media_index': k,
-                                    'episode_range': num00,
-                                    'episode_count': len(episodes),
-                                    'episode': episodes})
+                    seasons.append({
+                        'media_index': k,
+                        'episode_range': num00,
+                        'episode_count': len(episodes),
+                        'episode': episodes
+                    })
 
-                num, num00 = format_group_index([helpers.cast_to_int(d['media_index']) for d in seasons])
+                num, num00 = format_group_index(
+                    [helpers.cast_to_int(d['media_index']) for d in seasons])
 
                 show_metadata['season_range'] = num00
                 show_metadata['season_count'] = len(seasons)
@@ -783,16 +899,21 @@ class RecentlyAdded(Newsletter):
                 if artist_rating_key in artist_rating_keys:
                     continue
 
-                artist_metadata = pms_connect.get_metadata_details(artist_rating_key, media_info=False)
+                artist_metadata = pms_connect.get_metadata_details(
+                    artist_rating_key, media_info=False)
                 children = pms_connect.get_item_children(artist_rating_key)
-                filtered_children = [i for i in children['children_list']
-                                     if self.start_time < helpers.cast_to_int(i['added_at']) < self.end_time]
+                filtered_children = [
+                    i for i in children['children_list'] if self.start_time <
+                    helpers.cast_to_int(i['added_at']) < self.end_time
+                ]
                 filtered_children.sort(key=lambda x: x['added_at'])
 
                 albums = []
                 for a in filtered_children:
-                    album_metadata = pms_connect.get_metadata_details(a['rating_key'], media_info=False)
-                    album_metadata['track_count'] = helpers.cast_to_int(album_metadata['children_count'])
+                    album_metadata = pms_connect.get_metadata_details(
+                        a['rating_key'], media_info=False)
+                    album_metadata['track_count'] = helpers.cast_to_int(
+                        album_metadata['children_count'])
                     albums.append(album_metadata)
 
                 artist_metadata['album_count'] = len(albums)
@@ -809,12 +930,15 @@ class RecentlyAdded(Newsletter):
         from notification_handler import get_img_info, set_hash_image_info
 
         if not self.config['incl_libraries']:
-            logger.warn(u"Tautulli Newsletters :: Failed to retrieve %s newsletter data: no libraries selected." % self.NAME)
+            logger.warn(
+                u"Tautulli Newsletters :: Failed to retrieve %s newsletter data: no libraries selected."
+                % self.NAME)
 
         media_types = set()
         for s in self._get_sections():
             if str(s['section_id']) in self.config['incl_libraries']:
-                if s['section_type'] == 'movie' and s['agent'] == 'com.plexapp.agents.none':
+                if s['section_type'] == 'movie' and s[
+                        'agent'] == 'com.plexapp.agents.none':
                     media_types.add('other_video')
                 else:
                     media_types.add(s['section_type'])
@@ -822,7 +946,8 @@ class RecentlyAdded(Newsletter):
         recently_added = {}
         for media_type in media_types:
             if media_type not in recently_added:
-                recently_added[media_type] = self._get_recently_added(media_type)
+                recently_added[media_type] = self._get_recently_added(
+                    media_type)
 
         movies = recently_added.get('movie', [])
         shows = recently_added.get('show', [])
@@ -830,7 +955,8 @@ class RecentlyAdded(Newsletter):
         albums = [a for artist in artists for a in artist['album']]
         other_video = recently_added.get('other_video', [])
 
-        if self.is_preview or helpers.get_img_service(include_self=True) == 'self-hosted':
+        if self.is_preview or helpers.get_img_service(
+                include_self=True) == 'self-hosted':
             for item in movies + shows + albums + other_video:
                 if item['media_type'] == 'album':
                     height = 150
@@ -839,19 +965,26 @@ class RecentlyAdded(Newsletter):
                     height = 225
                     fallback = 'poster'
 
-                item['thumb_hash'] = set_hash_image_info(
-                    img=item['thumb'], width=150, height=height, fallback=fallback)
+                item['thumb_hash'] = set_hash_image_info(img=item['thumb'],
+                                                         width=150,
+                                                         height=height,
+                                                         fallback=fallback)
 
                 if item['art']:
-                    item['art_hash'] = set_hash_image_info(
-                        img=item['art'], width=500, height=280,
-                        opacity=25, background='282828', blur=3, fallback='art')
+                    item['art_hash'] = set_hash_image_info(img=item['art'],
+                                                           width=500,
+                                                           height=280,
+                                                           opacity=25,
+                                                           background='282828',
+                                                           blur=3,
+                                                           fallback='art')
                 else:
                     item['art_hash'] = ''
 
                 item['thumb_url'] = ''
                 item['art_url'] = ''
-                item['poster_url'] = item['thumb_url']  # Keep for backwards compatibility
+                item['poster_url'] = item[
+                    'thumb_url']  # Keep for backwards compatibility
 
         elif helpers.get_img_service():
             # Upload posters and art to image hosting service
@@ -863,21 +996,32 @@ class RecentlyAdded(Newsletter):
                     height = 225
                     fallback = 'poster'
 
-                img_info = get_img_info(
-                    img=item['thumb'], rating_key=item['rating_key'], title=item['title'],
-                    width=150, height=height, fallback=fallback)
+                img_info = get_img_info(img=item['thumb'],
+                                        rating_key=item['rating_key'],
+                                        title=item['title'],
+                                        width=150,
+                                        height=height,
+                                        fallback=fallback)
 
-                item['thumb_url'] = img_info.get('img_url') or common.ONLINE_POSTER_THUMB
+                item['thumb_url'] = img_info.get(
+                    'img_url') or common.ONLINE_POSTER_THUMB
 
-                img_info = get_img_info(
-                    img=item['art'], rating_key=item['rating_key'], title=item['title'],
-                    width=500, height=280, opacity=25, background='282828', blur=3, fallback='art')
+                img_info = get_img_info(img=item['art'],
+                                        rating_key=item['rating_key'],
+                                        title=item['title'],
+                                        width=500,
+                                        height=280,
+                                        opacity=25,
+                                        background='282828',
+                                        blur=3,
+                                        fallback='art')
 
                 item['art_url'] = img_info.get('img_url')
 
                 item['thumb_hash'] = ''
                 item['art_hash'] = ''
-                item['poster_url'] = item['thumb_url']  # Keep for backwards compatibility
+                item['poster_url'] = item[
+                    'thumb_url']  # Keep for backwards compatibility
 
         else:
             for item in movies + shows + albums + other_video:
@@ -885,7 +1029,8 @@ class RecentlyAdded(Newsletter):
                 item['art_hash'] = ''
                 item['thumb_url'] = ''
                 item['art_url'] = ''
-                item['poster_url'] = item['thumb_url']  # Keep for backwards compatibility
+                item['poster_url'] = item[
+                    'thumb_url']  # Keep for backwards compatibility
 
         self.data['recently_added'] = recently_added
 
@@ -893,11 +1038,10 @@ class RecentlyAdded(Newsletter):
 
     def _has_data(self):
         recently_added = self.data.get('recently_added')
-        if recently_added and (
-                recently_added.get('movie') or
-                recently_added.get('show') or
-                recently_added.get('artist') or
-                recently_added.get('other_video')):
+        if recently_added and (recently_added.get('movie')
+                               or recently_added.get('show')
+                               or recently_added.get('artist')
+                               or recently_added.get('other_video')):
             return True
 
         return False
@@ -909,21 +1053,25 @@ class RecentlyAdded(Newsletter):
         sections = {}
         for s in self._get_sections():
             if s['section_type'] != 'photo':
-                if s['section_type'] == 'movie' and s['agent'] == 'com.plexapp.agents.none':
+                if s['section_type'] == 'movie' and s[
+                        'agent'] == 'com.plexapp.agents.none':
                     library_type = 'other_video'
                 else:
                     library_type = s['section_type']
                 group = sections.get(library_type, [])
-                group.append({'value': s['section_id'],
-                              'text': s['section_name']})
+                group.append({
+                    'value': s['section_id'],
+                    'text': s['section_name']
+                })
                 sections[library_type] = group
 
-        groups = OrderedDict([(k, v) for k, v in [
-            ('Movie Libraries', sections.get('movie')),
-            ('TV Show Libraries', sections.get('show')),
-            ('Music Libraries', sections.get('artist')),
-            ('Other Video Libraries', sections.get('other_video'))
-        ] if v is not None])
+        groups = OrderedDict([(k, v) for k, v in [(
+            'Movie Libraries',
+            sections.get('movie')), (
+                'TV Show Libraries', sections.get('show')
+            ), ('Music Libraries', sections.get('artist')
+                ), ('Other Video Libraries', sections.get('other_video'))]
+                              if v is not None])
 
         return groups
 
@@ -935,21 +1083,22 @@ class RecentlyAdded(Newsletter):
             if str(s['section_id']) in self.config['incl_libraries']:
                 newsletter_libraries.append(s['section_name'])
 
-        parameters['newsletter_libraries'] = ', '.join(sorted(newsletter_libraries))
+        parameters['newsletter_libraries'] = ', '.join(
+            sorted(newsletter_libraries))
         parameters['pms_identifier'] = plexpy.CONFIG.PMS_IDENTIFIER
         parameters['pms_web_url'] = plexpy.CONFIG.PMS_WEB_URL
 
         return parameters
 
     def _return_config_options(self):
-        config_options = [
-            {'label': 'Included Libraries',
-             'value': self.config['incl_libraries'],
-             'description': 'Select the libraries to include in the newsletter.',
-             'name': 'newsletter_config_incl_libraries',
-             'input_type': 'selectize',
-             'select_options': self._get_sections_options()
-             }
-        ]
+        config_options = [{
+            'label': 'Included Libraries',
+            'value': self.config['incl_libraries'],
+            'description':
+            'Select the libraries to include in the newsletter.',
+            'name': 'newsletter_config_incl_libraries',
+            'input_type': 'selectize',
+            'select_options': self._get_sections_options()
+        }]
 
         return config_options
