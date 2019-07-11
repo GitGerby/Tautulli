@@ -1357,7 +1357,8 @@ def split_args(args=None):
 def mask_config_passwords(config):
     if isinstance(config, list):
         for cfg in config:
-            if 'password' in cfg.get('name', '') and cfg.get('value', '') != '':
+            if 'password' in cfg.get('name',
+                                     '') and cfg.get('value', '') != '':
                 cfg['value'] = '    '
 
     elif isinstance(config, dict):
